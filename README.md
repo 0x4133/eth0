@@ -4,6 +4,7 @@
 
 **Hardware:** Waveshare ESP32-S3-ETH (W5500 Ethernet + SD Card)
 **Interface:** Serial console at 115200 baud
+<img width="419" height="391" alt="esp32-s3-ETH" src="https://github.com/user-attachments/assets/4dd264da-b41c-488f-8a20-2d03de7f7e9c" />
 
 ---
 
