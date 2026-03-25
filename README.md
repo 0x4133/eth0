@@ -44,6 +44,9 @@
 
 ## 1. Getting Started
 
+<img width="861" height="720" alt="settings" src="https://github.com/user-attachments/assets/0e345ddf-c894-482f-b9ee-fb6b448773d1" />
+
+
 ### First Boot
 
 Connect the ESP32-S3-ETH to your network via Ethernet and open a serial terminal at 115200 baud. On power-up you'll see:
