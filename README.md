@@ -46,6 +46,9 @@
 
 <img width="861" height="720" alt="settings" src="https://github.com/user-attachments/assets/0e345ddf-c894-482f-b9ee-fb6b448773d1" />
 
+<img width="967" height="513" alt="esp32-s3-ETH_dimensions" src="https://github.com/user-attachments/assets/4096b933-7d4c-421e-9971-dd2964afe88c" />
+
+![ESP32-S3-ETH-details-15](https://github.com/user-attachments/assets/121c3c53-c736-414d-b2b4-98b1077b3209)
 
 ### First Boot
 
