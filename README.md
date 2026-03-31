@@ -9,6 +9,7 @@
 <img width="419" height="391" alt="esp32-s3-ETH" src="https://github.com/user-attachments/assets/102036de-a110-400b-ab86-636a15e9319b" />
 <img width="967" height="513" alt="esp32-s3-ETH_dimensions" src="https://github.com/user-attachments/assets/7b1c6404-54ca-4d99-b88d-6813cc280093" />
 <img width="861" height="720" alt="settings" src="https://github.com/user-attachments/assets/ff726d88-fca2-4db6-998a-00c5b7b0d4f0" />
+
 ![ESP32-S3-ETH-details-15](https://github.com/user-attachments/assets/0d858907-67c4-4521-9ade-8bbe88ac2a84)
 
 
