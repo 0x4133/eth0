@@ -3,72 +3,70 @@
 ## Complete Feature Guide & Usage Reference
 
 **Hardware:** Waveshare ESP32-S3-ETH (W5500 Ethernet + SD Card)
-**Interface:** Serial console at 115200 baud
-<img width="419" height="391" alt="esp32-s3-ETH" src="https://github.com/user-attachments/assets/4dd264da-b41c-488f-8a20-2d03de7f7e9c" />
+**Interface:** Serial console at 460800 baud / Web Serial UI
 
 ---
 
 ## Table of Contents
 
 1. [Getting Started](#1-getting-started)
-2. [Packet Capture](#2-packet-capture)
-3. [Capture Filters](#3-capture-filters)
-4. [Packet Injection](#4-packet-injection)
-5. [Network Reconnaissance](#5-network-reconnaissance)
-   - [ARP Sweep](#arp-sweep)
-   - [Port Scanner (SYN Probe)](#port-scanner)
-   - [Service Scanner (Banner Grab)](#service-scanner)
-   - [VLAN Discovery](#vlan-discovery)
-   - [STP Topology Mapping](#stp-topology-mapping)
-   - [LLDP/CDP Neighbor Discovery](#lldpcdp-neighbor-discovery)
-   - [mDNS/NBNS Host Discovery](#mdnsnbns-host-discovery)
-6. [Intrusion Detection System (IDS)](#6-intrusion-detection-system)
-7. [OS Fingerprinting](#7-os-fingerprinting)
-8. [ARP Spoofing / MitM](#8-arp-spoofing--mitm)
-9. [DNS Spoofing](#9-dns-spoofing)
-10. [TCP RST Injection (Connection Killing)](#10-tcp-rst-injection)
-11. [DHCP Starvation](#11-dhcp-starvation)
-12. [NBNS/LLMNR Poisoning](#12-nbnsllmnr-poisoning)
-13. [MAC Address Spoofing](#13-mac-address-spoofing)
-14. [Packet Replay](#14-packet-replay)
-15. [Encrypted UDP Tunnel](#15-encrypted-udp-tunnel)
-16. [DNS Covert Channel](#16-dns-covert-channel)
-17. [UDP Chat](#17-udp-chat)
-18. [Live Packet Stats](#18-live-packet-stats)
-19. [Hexdump / PCAP-over-Serial](#19-hexdump--pcap-over-serial)
-20. [Syslog Alert Forwarding](#20-syslog-alert-forwarding)
-21. [Persistent Config (NVS)](#21-persistent-config)
-22. [Combined Attack Scenarios](#22-combined-attack-scenarios)
+2. [Web Serial UI](#2-web-serial-ui)
+3. [Packet Capture](#3-packet-capture)
+4. [Capture Filters](#4-capture-filters)
+5. [Packet Injection](#5-packet-injection)
+6. [Network Reconnaissance](#6-network-reconnaissance)
+7. [Intrusion Detection System (IDS)](#7-intrusion-detection-system)
+8. [Custom IDS Rules](#8-custom-ids-rules)
+9. [Wireless IDS (WIDS)](#9-wireless-ids-wids)
+10. [OS Fingerprinting](#10-os-fingerprinting)
+11. [ARP Spoofing / MitM](#11-arp-spoofing--mitm)
+12. [DNS Spoofing](#12-dns-spoofing)
+13. [TCP RST Injection (Connection Killing)](#13-tcp-rst-injection)
+14. [DHCP Starvation](#14-dhcp-starvation)
+15. [NBNS/LLMNR Poisoning](#15-nbnsllmnr-poisoning)
+16. [MAC Address Spoofing](#16-mac-address-spoofing)
+17. [Packet Replay](#17-packet-replay)
+18. [Encrypted UDP Tunnel](#18-encrypted-udp-tunnel)
+19. [DNS Covert Channel](#19-dns-covert-channel)
+20. [IRC Server](#20-irc-server)
+21. [TP-Link Kasa Device Query](#21-tp-link-kasa-device-query)
+22. [WiFi & BLE Scanning](#22-wifi--ble-scanning)
+23. [Live Packet Stats](#23-live-packet-stats)
+24. [Hexdump / PCAP-over-Serial](#24-hexdump--pcap-over-serial)
+25. [Syslog Alert Forwarding](#25-syslog-alert-forwarding)
+26. [SD Card File Management](#26-sd-card-file-management)
+27. [Persistent Config](#27-persistent-config)
+28. [Network Map](#28-network-map)
+29. [Combined Attack Scenarios](#29-combined-attack-scenarios)
 
 ---
 
 ## 1. Getting Started
 
-<img width="861" height="720" alt="settings" src="https://github.com/user-attachments/assets/0e345ddf-c894-482f-b9ee-fb6b448773d1" />
-
-<img width="967" height="513" alt="esp32-s3-ETH_dimensions" src="https://github.com/user-attachments/assets/4096b933-7d4c-421e-9971-dd2964afe88c" />
-
-![ESP32-S3-ETH-details-15](https://github.com/user-attachments/assets/121c3c53-c736-414d-b2b4-98b1077b3209)
-
 ### First Boot
 
-Connect the ESP32-S3-ETH to your network via Ethernet and open a serial terminal at 115200 baud. On power-up you'll see:
+Connect the ESP32-S3-ETH to your network via Ethernet and open a serial terminal at **460800 baud**. On power-up you'll see:
 
 ```
-=== ESP32-S3-ETH Packet Capture & Injection + IDS ===
-[SD] Card ready. Size: 7552 MB
+  ┌─────────────────────────────────────────┐
+  │         eth0 — Network Security Tool     │
+  │     ESP32-S3-ETH  /  W5500 + SD Card    │
+  └─────────────────────────────────────────┘
+[ETH] W5500 reset complete.
+[SD] Card ready. Size: 15193 MB
 [ETH] MAC: 02:CA:FE:BA:BE:01
-[ETH] Requesting IP via DHCP...
-[ETH] DHCP OK! IP: 192.168.1.42  GW: 192.168.1.1  DNS: 192.168.1.1
+[ETH] DHCP OK! IP: 192.168.50.187  GW: 192.168.50.1  DNS: 192.168.50.1
 [ETH] MACRAW socket opened on socket 0
 [SD] Opened /capture_0000.pcap
+[IDS] Loaded 3 rules from /ids_rules.json
 [CAPTURE] Started. Filter: none (capturing all)
 [IDS] Detection engine ACTIVE
 ```
 
 The device is now:
 - Capturing all Ethernet frames to SD card in PCAP format
-- Running the IDS engine on every packet
+- Running the IDS engine (built-in + custom rules) on every packet
+- Auto-loaded IDS rules and WIDS baseline from SD card
 - Listening for serial commands
 
 ### Quick Command Reference
@@ -78,15 +76,53 @@ The device is now:
 | `s` | Stop/start capture |
 | `f` | Show current filter |
 | `ids` | Toggle IDS on/off |
+| `ids rule list` | Show custom rules |
 | `stats` | Show packet statistics |
-| `recon fingerprint` | Show OS fingerprints |
 | `recon sweep` | ARP sweep local subnet |
+| `recon ports <IP>` | TCP SYN port scan |
+| `wids start` | Start wireless IDS |
+| `wifi scan` | Scan WiFi networks |
+| `ble scan` | Scan BLE devices |
+| `map` | Show network map |
+| `kasa <IP>` | Query TP-Link Kasa device |
+| `help` | Full command list |
 
 Type any command and press Enter.
 
 ---
 
-## 2. Packet Capture
+## 2. Web Serial UI
+
+eth0 includes a browser-based web interface that connects via the **Web Serial API** (Chrome/Edge). Open `eth0/www/index.html` in your browser and click **Connect**.
+
+### Tabs
+
+| Tab | Purpose |
+|-----|---------|
+| **Chat** | AI assistant for security analysis |
+| **Alerts** | IDS/WIDS alert feed with stacking, ack, watch, approve |
+| **Control** | Start/stop capture, MitM, DNS spoof, WIDS toggles |
+| **Recon** | Network discovery, port scanning, WiFi/BLE scanning |
+| **Map** | Live network topology with per-host stats |
+| **Rules** | IDS custom rules — add, edit, enable/disable, import/export |
+| **Files** | SD card file browser — view/edit config, download PCAPs |
+| **Terminal** | Raw serial console |
+| **Packets** | Recent packet summary |
+
+### Key Features
+
+- **Alert stacking** — duplicate alerts are grouped with an `x5` badge instead of flooding the list
+- **Alert actions** — each alert has: `approve` (WIDS), `rule` (create IDS rule), `edit rule` (pre-fill rule form), `ack`, `ai` (send to AI for triage)
+- **WIDS detection toggles** — enable/disable individual detections (evil twin, channel hop, flood, jamming, etc.) with adjustable thresholds
+- **Rule creation from alerts** — click "rule" on any alert to instantly create a monitoring rule for that IP/MAC
+- **Map node right-click** — port scan, service scan, MitM, kill connections, add IDS rule, copy IP, ask AI
+- **Live stats on map nodes** — packet counts, byte volume, connection count, alert count per host
+- **File browser** — edit IDS rules JSON and WIDS baseline CSV directly, download PCAPs
+- **Response routing** — typed JSON dispatching prevents status/alert/rule responses from interfering with each other
+
+---
+
+## 3. Packet Capture
 
 The device captures raw Ethernet frames in promiscuous mode (sees ALL traffic on the wire, not just traffic addressed to it) and writes them to SD card in PCAP format, readable by Wireshark.
 
@@ -111,7 +147,7 @@ wireshark capture_0000.pcap
 
 ---
 
-## 3. Capture Filters
+## 4. Capture Filters
 
 Filters control which packets are written to the PCAP file. IDS analysis always runs on ALL packets regardless of filter.
 
@@ -163,7 +199,7 @@ f mac AA:BB:CC:DD:EE:FF
 
 ---
 
-## 4. Packet Injection
+## 5. Packet Injection
 
 Craft and send packets directly onto the wire.
 
@@ -204,7 +240,7 @@ Send an arbitrary Ethernet frame from hex bytes. Minimum 14 bytes (Ethernet head
 
 ---
 
-## 5. Network Reconnaissance
+## 6. Network Reconnaissance
 
 ### ARP Sweep
 
@@ -375,9 +411,102 @@ Output:
 
 This is completely passive — no packets are sent. It discovers hosts by listening to their name resolution traffic.
 
+### NetBIOS Reconnaissance
+
+Active NetBIOS discovery for Windows networks. Sends NBNS queries to discover hosts and their name tables (computer name, workgroup/domain, running services).
+
+#### Broadcast Sweep
+
+Discover all NetBIOS hosts on the local subnet:
+
+```
+recon netbios sweep
+```
+
+Or just `recon netbios` — if the table is empty it auto-sweeps:
+
+```
+recon netbios
+```
+
+Output:
+```
+[NETBIOS] Broadcasting wildcard name query...
+[NETBIOS] Queries sent. Waiting for responses (3s)...
+
+[NETBIOS] ═══ NBSTAT: 192.168.1.100 ═══
+  MAC: AA:BB:CC:DD:EE:01
+  Name             Type Flags  Description
+  ──────────────────────────────────────────────────
+  DESKTOP-ABC123   <00>  UNIQUE Workstation
+  DESKTOP-ABC123   <20>  UNIQUE File Server
+  WORKGROUP        <00>  GROUP  Domain/Workgroup
+  WORKGROUP        <1E>  GROUP  Browser Election
+
+[NETBIOS] ═══ NBSTAT: 192.168.1.50 ═══
+  MAC: AA:BB:CC:DD:EE:02
+  Name             Type Flags  Description
+  ──────────────────────────────────────────────────
+  FILESERVER       <00>  UNIQUE Workstation
+  FILESERVER       <20>  UNIQUE File Server
+  CORP             <00>  GROUP  Domain/Workgroup
+  CORP             <1C>  GROUP  Domain Controller
+
+[NETBIOS] Sweep done. 2 host(s) in table.
+```
+
+#### Query Specific Host (NBSTAT)
+
+Equivalent to `nbtstat -A` on Windows — dumps the full NetBIOS name table of a specific host:
+
+```
+recon netbios 192.168.1.100
+```
+
+This sends a unicast NBSTAT (Node Status) query and displays every registered name, its suffix type, and whether it's a unique or group name.
+
+#### View Discovered Hosts Table
+
+```
+recon netbios
+```
+
+Output:
+```
+[NETBIOS] ═══ Discovered Hosts ═══
+  IP               MAC                Name             Workgroup
+  ──────────────────────────────────────────────────────────────
+  192.168.1.100    AA:BB:CC:DD:EE:01  DESKTOP-ABC123   WORKGROUP
+  192.168.1.50     AA:BB:CC:DD:EE:02  FILESERVER       CORP
+
+  2 host(s)
+```
+
+#### Clear Table
+
+```
+recon netbios clear
+```
+
+#### NetBIOS Suffix Types
+
+| Suffix | Unique | Description |
+|--------|--------|-------------|
+| `<00>` | Unique | Workstation name |
+| `<00>` | Group | Domain/Workgroup |
+| `<03>` | Unique | Messenger service |
+| `<06>` | Unique | RAS Server |
+| `<1B>` | Unique | Domain Master Browser |
+| `<1C>` | Group | Domain Controller |
+| `<1D>` | Unique | Master Browser |
+| `<1E>` | Group | Browser Election |
+| `<20>` | Unique | File Server (sharing enabled) |
+
+A host with `<20>` has file sharing enabled. A host with `<1C>` group name is a domain controller. Seeing `<03>` means the Messenger service is running (rare on modern Windows).
+
 ---
 
-## 6. Intrusion Detection System
+## 7. Intrusion Detection System
 
 The IDS runs on every captured packet and detects:
 
@@ -417,7 +546,103 @@ The NeoPixel LED provides visual feedback:
 
 ---
 
-## 7. OS Fingerprinting
+## 8. Custom IDS Rules
+
+Create rules to watch for specific traffic patterns. Rules auto-save to `/ids_rules.json` on SD and auto-load at boot.
+
+### Add a Rule
+
+```
+ids rule add <name> <type> <value> [level] [threshold N/Ws]
+```
+
+**Types:** `src-ip`, `dst-ip`, `src-port`, `dst-port`, `proto`, `payload`, `src-mac`, `dst-mac`, `ethertype`, `arp-op`
+
+```
+ids rule add webwatch dst-port 80 warn          # Alert on all HTTP
+ids rule add scanner src-ip 10.0.0.5 crit       # Watch specific host
+ids rule add dns-flood dst-port 53 warn 50/10   # Alert if >50 DNS queries in 10s
+ids rule add arp-sniff arp-op reply info         # Log all ARP replies
+ids rule add custom payload 504153535750 crit    # Match hex payload ("PASSW")
+```
+
+### Manage Rules
+
+```
+ids rule list              # Show all rules with hit counts
+ids rule enable 3          # Enable rule at index 3
+ids rule disable 3         # Disable rule at index 3
+ids rule remove 3          # Delete rule at index 3
+ids rule clear             # Remove all rules
+ids rule save              # Save to SD (auto on changes via web UI)
+ids rule load              # Load from SD (auto at boot)
+ids rule export            # Export as JSON to serial
+```
+
+### Rule Alerts
+
+When a rule matches, alerts include the rule name, match type, context, and hit count:
+```
+[ALERT #42][WARN] RULE [webwatch] (dst-port) 192.168.1.5 -> 10.0.0.1 (hits:127)
+[ALERT #43][WARN] RULE [dns-flood] (dst-port) 50 hits/10s | 192.168.1.5 -> 8.8.8.8 (total:523)
+```
+
+Rules can also be created from the web UI's Alerts tab — click **"rule"** on any alert to instantly create a monitoring rule, or **"edit rule"** to pre-fill the form and customize before adding.
+
+Max 32 rules (each ~80 bytes RAM).
+
+---
+
+## 9. Wireless IDS (WIDS)
+
+Monitors WiFi and BLE for wireless attacks. Learns a baseline of known networks, then alerts on anomalies.
+
+### Start WIDS
+
+```
+wids start [sec]           # Load saved baseline from SD, or learn for N seconds (default 60)
+wids learn [sec]           # Force re-learn (ignores saved baseline)
+wids stop                  # Disable WIDS
+wids status                # Show baseline, trackers, alert count
+```
+
+On first run, WIDS learns all visible WiFi networks as "known good" for the specified duration. The baseline auto-saves to `/wids_baseline.csv` on SD. On subsequent starts, it loads the saved baseline and goes straight to monitoring.
+
+### Detections
+
+| Detection | Default | Description |
+|-----------|---------|-------------|
+| Evil Twin | ON | New BSSID broadcasting a known SSID |
+| Channel Hop | ON | Known AP moved to a different channel |
+| Enc Downgrade | ON | AP encryption type weakened (WPA2 -> WPA) |
+| New Network | ON | Previously unseen AP appeared |
+| Flood | ON | Many new networks in one scan (beacon stuffing) |
+| Jamming | ON | Baselined networks disappearing (deauth/RF jam) |
+| BLE Trackers | ON | AirTag, Tile, SmartTag, FindMy detection |
+
+### Configure Detections
+
+From the web UI Control tab, each detection has a toggle. From serial:
+```
+wids set evilTwin off      # Disable evil twin detection
+wids set floodThresh 12    # Change flood threshold (default 8)
+wids set missThresh 5      # Scans before "disappeared" alert (default 3)
+```
+
+### Manage Baseline
+
+```
+wids approve AA:BB:CC:DD:EE:FF   # Add AP to known-good baseline
+wids save                         # Save baseline to SD
+wids load                         # Load baseline from SD
+wids clear                        # Clear baseline (RAM + SD)
+```
+
+From the web UI Alerts tab, WIDS alerts have an **"approve"** button that adds the AP to the baseline and auto-saves.
+
+---
+
+## 10. OS Fingerprinting
 
 Passively identifies operating systems by analyzing TCP SYN and SYN-ACK packets. Examines TTL, window size, MSS, SACK, and window scale options.
 
@@ -442,7 +667,7 @@ This is completely passive — no traffic is generated. The fingerprint table po
 
 ---
 
-## 8. ARP Spoofing / MitM
+## 11. ARP Spoofing / MitM
 
 Poisons ARP caches of a target victim and the gateway so their traffic flows through the ESP32, enabling full traffic interception.
 
@@ -492,7 +717,7 @@ This sends 3 rounds of corrective ARP replies to restore the original MAC bindin
 
 ---
 
-## 9. DNS Spoofing
+## 12. DNS Spoofing
 
 Intercepts DNS queries and responds with forged answers before the real DNS server can reply.
 
@@ -542,7 +767,7 @@ dnsspoof stop
 
 ---
 
-## 10. TCP RST Injection
+## 13. TCP RST Injection
 
 Kill active TCP connections by injecting RST packets. A passive TCP connection tracker runs in the background, recording sequence numbers from observed traffic.
 
@@ -587,7 +812,7 @@ RSTs only connections to/from port 80 on that IP.
 
 ---
 
-## 11. DHCP Starvation
+## 14. DHCP Starvation
 
 Exhausts the DHCP server's address pool by flooding DHCP DISCOVER packets with random spoofed MAC addresses. Each request appears to come from a different device.
 
@@ -629,7 +854,7 @@ The DHCP server will offer an IP to each unique MAC, eventually exhausting its p
 
 ---
 
-## 12. NBNS/LLMNR Poisoning
+## 15. NBNS/LLMNR Poisoning
 
 Responds to Windows name resolution broadcasts (NBNS on port 137, LLMNR on port 5355) with our IP address, causing Windows hosts to connect to us instead of the intended target.
 
@@ -669,7 +894,7 @@ mitm start 192.168.1.50            # Optionally MitM the victim
 
 ---
 
-## 13. MAC Address Spoofing
+## 16. MAC Address Spoofing
 
 Change the device's MAC address on the fly for anonymity or impersonation.
 
@@ -722,7 +947,7 @@ Auto-rotation generates a new random MAC at the specified interval, useful for a
 
 ---
 
-## 14. Packet Replay
+## 17. Packet Replay
 
 Replay previously captured PCAP files from the SD card onto the wire.
 
@@ -762,7 +987,7 @@ Press any key during replay to abort.
 
 ---
 
-## 15. Encrypted UDP Tunnel
+## 18. Encrypted UDP Tunnel
 
 Establishes an AES-128-CBC encrypted point-to-point communication channel over UDP. Uses the ESP32-S3's hardware AES acceleration for fast encryption.
 
@@ -840,7 +1065,7 @@ Both devices must use the same key. A PC-side script could also participate by i
 
 ---
 
-## 16. DNS Covert Channel
+## 19. DNS Covert Channel
 
 Exfiltrates data by encoding it as base32 subdomains in DNS A queries. The data is carried in the query name itself, making it look like normal DNS traffic to firewalls and IDS.
 
@@ -908,9 +1133,7 @@ for query in dns_queries:
 
 ---
 
-## 17. UDP Chat
-
-Real-time bidirectional messaging over UDP.
+## 23. Live Packet Stats
 
 ### Start Chat with Specific Peer
 
@@ -948,7 +1171,7 @@ chat off
 
 ---
 
-## 18. Live Packet Stats
+## 23. Live Packet Stats (continued)
 
 Real-time traffic statistics with protocol breakdown and top talkers.
 
@@ -995,7 +1218,7 @@ stats reset
 
 ---
 
-## 19. Hexdump / PCAP-over-Serial
+## 24. Hexdump / PCAP-over-Serial
 
 ### Live Hex Dump
 
@@ -1048,7 +1271,7 @@ hexdump pcap off
 
 ---
 
-## 20. Syslog Alert Forwarding
+## 25. Syslog Alert Forwarding
 
 Forward IDS alerts to a remote syslog server over UDP. Compatible with rsyslog, syslog-ng, Graylog, Splunk, etc.
 
@@ -1107,35 +1330,93 @@ input(type="imudp" port="514")
 
 ---
 
-## 21. Persistent Config
+*(Persistent Config and Network Map sections moved — see sections 27 and 28 above.)*
 
-Save settings to ESP32 flash (NVS) so they survive power cycles.
+Output:
+```
+  ┌─────────────────────────────────────────────────────────────┐
+  │                    eth0 — Network Map                        │
+  └─────────────────────────────────────────────────────────────┘
 
-### Save Current Settings
+  THIS DEVICE
+  ───────────────────────────────────────────────────────────────
+    IP:      192.168.1.42
+    MAC:     02:CA:FE:BA:BE:01
+    Gateway: 192.168.1.1
+    Subnet:  255.255.255.0
+    DNS:     192.168.1.1
+    Status:  MitM DNS-Spoof
+
+  INFRASTRUCTURE
+  ───────────────────────────────────────────────────────────────
+    [DHCP]   192.168.1.1  AA:BB:CC:DD:EE:01  (trusted)
+    [LLDP]   AA:BB:CC:DD:EE:01  switch01  port:Gi0/1  vlan:10
+    [RSTP]   8000.AA:BB:CC:DD:EE:01  (root bridge)
+
+  HOSTS (3 discovered)
+  ───────────────────────────────────────────────────────────────
+
+    192.168.1.1       AA:BB:CC:DD:EE:01
+      OS:      Network device
+      Traffic: 287 pkts / 198.2 KB
+      Roles:   [Gateway] [DNS] [DHCP]
+
+    192.168.1.50      AA:BB:CC:DD:EE:02
+      Name:    FILESERVER  [CORP]  (fileserver.local)
+      OS:      Windows 10/11
+      Traffic: 523 pkts / 403.4 KB
+      TCP:     4 active connection(s)
+      Roles:   [MitM TARGET]
+
+    192.168.1.100     AA:BB:CC:DD:EE:03
+      Name:    macbook-pro.local
+      OS:      macOS/iOS
+      Traffic: 156 pkts / 131.4 KB
+      TCP:     2 active connection(s)
+
+  SUMMARY
+  ───────────────────────────────────────────────────────────────
+    Hosts: 3  |  Fingerprints: 3  |  TCP conns: 6
+    LLDP/CDP: 1  |  STP bridges: 1  |  NetBIOS: 1
+    mDNS: 2  |  DHCP servers: 1  |  Alerts: 5
+    Packets: 1247 captured  |  27.6 pkt/s  |  42 sent
+    Uptime: 312s  |  Free heap: 245632 bytes
+```
+
+### What It Shows Per Host
+
+For each discovered host the map merges data from every source:
+
+| Source | What it adds |
+|--------|-------------|
+| ARP table | IP address, MAC address |
+| mDNS sniffer | `.local` hostname |
+| NetBIOS recon | Computer name, workgroup/domain |
+| OS fingerprinting | Operating system guess |
+| Traffic stats | Packet/byte counts |
+| TCP tracker | Active connection count |
+| DHCP/Gateway/DNS | Role labels |
+| MitM state | `[MitM TARGET]` label |
+
+### Infrastructure Section
+
+Shows network infrastructure discovered by passive listeners:
+- **DHCP servers** (trusted and rogue)
+- **Switches** via LLDP/CDP (name, port you're connected to, VLAN)
+- **STP root bridge** (bridge priority and MAC)
+
+### Typical Workflow
 
 ```
-config save
+recon sweep              # Populate ARP table
+recon netbios            # Get Windows hostnames
+# Wait 30-60s for LLDP/CDP, STP, mDNS, fingerprints
+map                      # See everything
 ```
-
-Saves: IDS state, capture filter, auto-stats settings, syslog configuration.
-
-### Reload from Flash
-
-```
-config load
-```
-
-### Clear Saved Config
-
-```
-config clear
-```
-
-Settings are automatically loaded on boot. After clearing, defaults are used on next power-up.
 
 ---
 
-## 22. Combined Attack Scenarios
+## 29. Combined Attack Scenarios
 
 ### Scenario 1: Full Network Reconnaissance
 
@@ -1155,11 +1436,14 @@ recon stp
 # 5. Wait for OS fingerprints to populate
 recon fingerprint
 
-# 6. Scan interesting hosts
+# 6. Discover Windows hosts and workgroups
+recon netbios
+
+# 7. Scan interesting hosts
 recon ports 192.168.1.50
 recon scan 192.168.1.50 22,80,443
 
-# 7. Check for passively discovered services
+# 8. Check for passively discovered services
 recon mdns
 ```
 
@@ -1241,6 +1525,130 @@ ids stats               # Check for anomalies
 
 ---
 
+## 20. IRC Server
+
+Built-in IRC server for out-of-band communication over raw TCP on port 6667.
+
+```
+irc start           # Start IRC server
+irc stop            # Stop IRC server
+irc status          # Show connected clients
+```
+
+Connect any IRC client on the network to `<eth0-IP>:6667`.
+
+---
+
+## 21. TP-Link Kasa Device Query
+
+Query TP-Link Kasa smart devices for device info, GPS coordinates, and cloud credentials.
+
+```
+kasa <IP>            # Query device info (model, firmware, GPS, relay state)
+kasa cloud <IP>      # Extract cloud account credentials (username, server)
+```
+
+Requires the target device to be on the same network. Uses the Kasa XOR protocol on port 9999.
+
+---
+
+## 22. WiFi & BLE Scanning
+
+### WiFi
+
+```
+wifi scan            # Start async WiFi scan
+wifi list            # Show cached results (SSID, BSSID, RSSI, channel, encryption)
+wifi auto 30         # Auto-scan every 30 seconds
+wifi auto off        # Stop auto-scan
+```
+
+### BLE
+
+```
+ble scan [sec]       # Scan BLE devices (default 5 seconds)
+ble list             # Show cached BLE results (name, address, RSSI, manufacturer)
+```
+
+BLE scanning detects tracker devices (AirTag, Tile, SmartTag, FindMy, Chipolo) and reports them as WIDS alerts when WIDS is active.
+
+> **Note:** BLE is disabled by default (saves ~60KB heap). Uncomment `#define ETH0_BLE_ENABLED` in the source to enable.
+
+---
+
+## 26. SD Card File Management
+
+The device stores config and capture files on the SD card:
+
+| File | Purpose |
+|------|---------|
+| `/ids_rules.json` | Custom IDS rules (auto-loaded at boot) |
+| `/wids_baseline.csv` | WIDS known-good AP baseline (auto-loaded) |
+| `/capture_NNNN.pcap` | Packet capture files (auto-rotated at 10MB) |
+
+### Serial Commands
+
+```
+# Files are managed automatically, but you can also:
+ids rule save/load         # Manual rule save/load
+wids save/load             # Manual baseline save/load
+replay capture_0001.pcap   # Replay a PCAP file on the wire
+```
+
+### Web UI File Browser
+
+The **Files** tab provides a split-pane file browser:
+
+- **Left panel** — lists config files (JSON/CSV) and capture files (PCAP) with sizes
+- **Right panel** — text editor for config files, packet viewer for PCAPs
+
+**Config files:** Click to open in editor. Edit directly. Click **Save** to write back — the firmware auto-reloads the config so changes take effect immediately.
+
+**PCAP files:** Three buttons per file:
+- **View** — paginated packet list (30 per page) showing protocol, source, destination, ports
+- **Replay** — inject all packets back onto the wire (with confirm dialog)
+- **Download** — stream the file to your browser via hex encoding at 460800 baud
+
+---
+
+## 27. Persistent Config
+
+### NVS (Non-Volatile Storage)
+
+Settings saved to ESP32 flash (survives reboots without SD card):
+
+```
+config save          # Save current settings (IDS, filter, auto-stats, syslog)
+config load          # Reload from flash
+config clear         # Erase saved config
+```
+
+### SD Card Persistence
+
+These auto-save/load at boot:
+- IDS custom rules (`/ids_rules.json`)
+- WIDS baseline (`/wids_baseline.csv`)
+- Capture files (always written to SD)
+
+---
+
+## 28. Network Map
+
+The web UI Map tab shows a live network topology diagram:
+
+- **Self node** (green) — the eth0 device
+- **Gateway** (orange) — enriched with hostname, OS, MAC
+- **Host nodes** — color-coded by OS (Windows=blue, Linux=green, macOS=magenta, network devices=orange)
+- **Switch nodes** — discovered via LLDP/CDP
+- **WiFi subgraph** — diamond nodes for access points
+- **BLE subgraph** — rounded nodes for Bluetooth devices
+- **Connection edges** — TCP flows with port numbers
+- **Per-host stats** — packet count, byte volume, connections, alerts displayed on each node
+
+Pan, zoom (scroll wheel), and right-click any node for actions.
+
+---
+
 ## Hardware Notes
 
 ### Pin Mapping
@@ -1263,13 +1671,20 @@ ids stats               # Check for anomalies
 
 The W5500 and SD card run on separate SPI buses (SPI2 and SPI3), so there is no bus contention. Both operate independently and simultaneously.
 
+### Serial Configuration
+
+**Baud rate:** 460800
+**Data bits:** 8 / **Parity:** None / **Stop bits:** 1
+
+The Web Serial UI (`eth0/www/index.html`) auto-connects at 460800 baud.
+
 ### LED Color Reference
 
 | Color | Meaning |
 |-------|---------|
 | Blue | Startup / capture paused |
 | Green | Capturing normally |
-| Yellow | IDS warning alert |
+| Yellow | IDS warning / info alert |
 | Red | IDS critical alert |
 | Purple | Cleartext credentials detected |
 | Orange | MitM / DHCP starvation active |
