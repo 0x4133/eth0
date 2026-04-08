@@ -75,9 +75,6 @@ jobs:
       - name: Compile eth0 sketch
         run: |
           set -o pipefail
-          # Capture full output, then re-emit failures as ::error::
-          # annotations so the diagnostics appear inline on the run
-          # without needing to download logs.
           arduino-cli compile \
             --fqbn "${FQBN}" \
             --warnings more \
@@ -87,16 +84,29 @@ jobs:
           rc=${PIPESTATUS[0]}
           if [ $rc -ne 0 ]; then
             echo "── arduino-cli exited with code $rc ──"
-            # Tail of the build log, surfaced as an annotation block
-            echo "::group::compile errors (tail of build.log)"
-            tail -120 build.log
-            echo "::endgroup::"
-            # Re-emit each error/warning line as a workflow annotation
-            grep -E ": (error|fatal error):" build.log | while IFS= read -r line; do
-              echo "::error::${line}"
+            # Surface every diagnostic line as a workflow annotation.
+            # arduino-cli prints GCC-style messages: file:line:col: error: ...
+            grep -E "(error|warning|fatal):" build.log | while IFS= read -r line; do
+              # Try to parse "path:line:col: kind: message"
+              if echo "$line" | grep -qE '^[^:]+:[0-9]+:[0-9]+: (error|fatal error):'; then
+                echo "::error::${line}"
+              elif echo "$line" | grep -qE '^[^:]+:[0-9]+:[0-9]+: warning:'; then
+                echo "::warning::${line}"
+              else
+                echo "::error::${line}"
+              fi
             done
             exit $rc
           fi
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ github.sha }}
+          path: build.log
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Report firmware size
         run: |
