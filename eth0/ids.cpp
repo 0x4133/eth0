@@ -15,12 +15,7 @@
 #include "led.h"
 #include "pcap_writer.h"
 #include "state.h"
-
-// Forward declaration for syslog forwarding. The implementation
-// still lives in eth0.ino and will move into svc_syslog.cpp in a
-// later phase; this declaration is the temporary linker contract.
-extern bool syslogEnabled;
-void syslogSend(AlertLevel level, const char* msg);
+#include "svc_syslog.h"
 
 // ── Storage for the externs in ids.h and arp_table.h ──
 
