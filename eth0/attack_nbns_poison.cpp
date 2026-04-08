@@ -8,6 +8,7 @@
 #include <Arduino.h>
 
 #include "config.h"
+#include "dns_util.h"
 #include "eth_frame.h"
 #include "inject.h"
 #include "state.h"

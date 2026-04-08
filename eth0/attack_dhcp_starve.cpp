@@ -10,6 +10,7 @@
 
 #include "config.h"
 #include "eth_frame.h"
+#include "ids.h"
 #include "inject.h"
 #include "state.h"
 
