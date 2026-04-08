@@ -78,16 +78,20 @@ void pcapSerialSendGlobalHeader() {
 }
 
 void pcapSerialPacket(const uint8_t* pkt, uint16_t len) {
-  // PCAP packet header (16 bytes, little-endian)
+  // PCAP packet header (16 bytes, little-endian).
+  // The original code did `memcpy(phdr+8, &len, 4)` which reads 4
+  // bytes from a uint16_t — undefined behavior. Promote `len` to a
+  // uint32_t in a local first.
   uint32_t ms = millis();
   uint32_t sec = ms / 1000;
   uint32_t usec = (ms % 1000) * 1000;
+  uint32_t len32 = len;
 
   uint8_t phdr[16];
   memcpy(phdr + 0, &sec, 4);
   memcpy(phdr + 4, &usec, 4);
-  memcpy(phdr + 8, &len, 4);   // incl_len (little-endian on ESP32)
-  memcpy(phdr + 12, &len, 4);  // orig_len
+  memcpy(phdr + 8, &len32, 4);   // incl_len (little-endian on ESP32)
+  memcpy(phdr + 12, &len32, 4);  // orig_len
 
   Serial.write(phdr, 16);
   Serial.write(pkt, len);

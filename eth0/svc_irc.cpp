@@ -581,7 +581,6 @@ void ircCheckIncomingTcp(const uint8_t* pkt, uint16_t len) {
   uint16_t srcPort = pktRead16(tcpH);
   const uint8_t* srcIP = ipH + 12;
   uint32_t theirSeq = pktRead32(tcpH + 4);
-  uint32_t theirAck = pktRead32(tcpH + 8);
   uint8_t flags = tcpH[13];
   uint8_t tcpHdrLen = ((tcpH[12] >> 4) & 0x0F) * 4;
   uint16_t ipTotalLen = pktRead16(ipH + 2);

@@ -162,7 +162,6 @@ void sendUDP(const uint8_t* targetIP, uint16_t dstPort, const char* payload, uin
   pos += buildIPv4Header(txBuf + pos, ourIP, targetIP, IP_PROTO_UDP, udpLen);
 
   // UDP header
-  uint16_t udpStart = pos;
   uint16_t srcPort = 12345;
   pktWrite16(txBuf + pos, srcPort);
   pos += 2;  // Source port

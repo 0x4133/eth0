@@ -105,7 +105,7 @@ void mdnsCheckPacket(const uint8_t* pkt, uint16_t len) {
       // Parse answers
       for (uint16_t a = 0; a < ancount && offset + 12 <= dnsLen; a++) {
         char aName[64];
-        uint16_t consumed = dnsDecodeName(dns, dnsLen, offset, aName, sizeof(aName));
+        dnsDecodeName(dns, dnsLen, offset, aName, sizeof(aName));
 
         // Skip name
         while (offset < dnsLen) {

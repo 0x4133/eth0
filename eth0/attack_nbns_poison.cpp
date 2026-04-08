@@ -78,7 +78,6 @@ void poisonCheckPacket(const uint8_t* pkt, uint16_t len) {
 
     pos += buildIPv4Header(txBuf + pos, ourIP, srcIP, IP_PROTO_UDP, udpRespLen);
 
-    uint16_t uStart = pos;
     pktWrite16(txBuf + pos, LLMNR_PORT);
     pos += 2;
     pktWrite16(txBuf + pos, clientPort);

@@ -45,7 +45,6 @@ void dhcpStarveSendDiscover() {
   pos += buildIPv4Header(txBuf + pos, zeroIP, bcastIP, IP_PROTO_UDP, udpLen);
 
   // UDP header (port 68 -> 67)
-  uint16_t udpStart = pos;
   pktWrite16(txBuf + pos, 68);
   pos += 2;  // src port (DHCP client)
   pktWrite16(txBuf + pos, 67);
@@ -56,7 +55,6 @@ void dhcpStarveSendDiscover() {
   pos += 2;  // checksum disabled
 
   // DHCP fixed fields
-  uint16_t dhcpStart = pos;
   txBuf[pos++] = 1;  // op: BOOTREQUEST
   txBuf[pos++] = 1;  // htype: Ethernet
   txBuf[pos++] = 6;  // hlen: 6
