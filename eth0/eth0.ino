@@ -58,6 +58,7 @@
 #include "eth_frame.h"
 #include "ip_util.h"
 #include "pins.h"
+#include "spi_bus.h"
 #include "state.h"
 
 // ── Config ──
@@ -67,11 +68,7 @@
 #define MAX_FILE_SIZE (10UL * 1024UL * 1024UL)  // 10 MB per capture file (smaller = less to lose)
 #define COMMIT_PKT_BATCH 20                     // Also commit every N packets
 
-// Two separate SPI peripherals on ESP32-S3:
-//   Default SPI (FSPI/SPI2) → used by Ethernet2 library for W5500
-//   HSPI (SPI3)             → used for SD card
-// This avoids any bus contention — no switching needed.
-SPIClass sdSPI(HSPI);
+// SPI ownership and the `sdSPI` handle live in spi_bus.{h,cpp}.
 
 // Packet buffer (shared for RX and TX)
 uint8_t packetBuf[MAX_FRAME_SIZE];
@@ -568,8 +565,7 @@ void idsInitTables();
 void idsPrintStats();
 
 // Packet crafting
-void switchToEthSPI();
-void switchToSdSPI();
+// switchToEthSPI, switchToSdSPI are declared in spi_bus.h.
 uint16_t sendRawFrame(const uint8_t* frame, uint16_t len);
 // buildEthHeader, buildIPv4Header, ipChecksum, tcpChecksum are declared in eth_frame.h.
 void sendArpRequest(const uint8_t* targetIP);
@@ -1093,15 +1089,7 @@ void loop() {
 //  SPI Bus Switching
 // ══════════════════════════════════════════
 
-// SPI switching is no longer needed — W5500 uses SPI (SPI2/FSPI)
-// and SD card uses sdSPI (SPI3), each on dedicated hardware.
-void switchToEthSPI() {
-  // no-op: SPI is permanently mapped to ETH pins
-}
-
-void switchToSdSPI() {
-  // no-op: SD uses sdSPI (SPI3), always available
-}
+// switchToEthSPI() and switchToSdSPI() live in spi_bus.cpp.
 
 // ══════════════════════════════════════════
 //  Packet Filter Engine
