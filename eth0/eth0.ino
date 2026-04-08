@@ -609,7 +609,7 @@ int hexCharToVal(char c);
 
 // Recon
 void parseReconCommand(const char *cmd);
-void reconArpSweep(const uint8_t *baseIP, uint8_t startHost, uint8_t endHost);
+void reconArpSweep(uint32_t startIP, uint32_t endIP);
 void reconSynProbe(const uint8_t *targetIP, const uint16_t *ports, uint8_t numPorts);
 void reconVlanDiscover();
 uint16_t buildTcpSyn(uint8_t *buf, const uint8_t *dstMAC, const uint8_t *srcIP,
@@ -1450,7 +1450,7 @@ void printMenu() {
   Serial.println();
   Serial.println("  RECONNAISSANCE");
   Serial.println("  ───────────────────────────────────────────────────────────────");
-  Serial.println("    recon sweep [IP/24]         ARP sweep (default: local /24)");
+  Serial.println("    recon sweep [IP/CIDR]       ARP sweep (CIDR /16-/30, default local /24)");
   Serial.println("    recon ports <IP> [p1,p2..]  TCP SYN port probe");
   Serial.println("    recon scan <IP> [p1,p2..]   Service scan + banner grab");
   Serial.println("    recon vlan                  802.1Q VLAN discovery");
@@ -2735,18 +2735,36 @@ uint16_t buildVlanFrame(uint8_t *buf, const uint8_t *dstMAC, uint16_t vlanID,
 // Sends ARP who-has for each IP in range, then listens for replies.
 // Discovered hosts are printed and added to the IDS ARP table.
 
-void reconArpSweep(const uint8_t *baseIP, uint8_t startHost, uint8_t endHost) {
+void reconArpSweep(uint32_t startIP, uint32_t endIP) {
+  if (startIP > endIP) return;
+
+  uint8_t startArr[4] = {
+    (uint8_t)(startIP >> 24), (uint8_t)(startIP >> 16),
+    (uint8_t)(startIP >>  8), (uint8_t)(startIP)
+  };
+  uint8_t endArr[4] = {
+    (uint8_t)(endIP >> 24), (uint8_t)(endIP >> 16),
+    (uint8_t)(endIP >>  8), (uint8_t)(endIP)
+  };
   Serial.printf("[RECON] ARP sweep: %u.%u.%u.%u - %u.%u.%u.%u\n",
-    baseIP[0], baseIP[1], baseIP[2], startHost,
-    baseIP[0], baseIP[1], baseIP[2], endHost);
+    startArr[0], startArr[1], startArr[2], startArr[3],
+    endArr[0], endArr[1], endArr[2], endArr[3]);
+
+  uint32_t totalHosts = endIP - startIP + 1;
 
   idsSetLed(COLOR_YELLOW);
 
-  uint16_t sent = 0;
-  uint16_t found = 0;
+  uint32_t sent = 0;
+  uint32_t found = 0;
 
-  for (int host = startHost; host <= endHost; host++) {
-    uint8_t targetIP[4] = { baseIP[0], baseIP[1], baseIP[2], (uint8_t)host };
+  for (uint32_t ip = startIP; ip <= endIP; ip++) {
+    // Skip the subnet's network and broadcast addresses
+    if (ip == startIP || ip == endIP) continue;
+
+    uint8_t targetIP[4] = {
+      (uint8_t)(ip >> 24), (uint8_t)(ip >> 16),
+      (uint8_t)(ip >>  8), (uint8_t)(ip)
+    };
 
     // Skip our own IP
     if (memcmp(targetIP, ourIP, 4) == 0) continue;
@@ -2792,7 +2810,7 @@ void reconArpSweep(const uint8_t *baseIP, uint8_t startHost, uint8_t endHost) {
     // Print progress every 64 hosts
     if (sent % 64 == 0) {
       Serial.printf("  [SWEEP] %u/%u sent, %u found so far...\n",
-        sent, (endHost - startHost + 1), found);
+        (unsigned)sent, (unsigned)totalHosts, (unsigned)found);
     }
   }
 
@@ -2832,7 +2850,8 @@ void reconArpSweep(const uint8_t *baseIP, uint8_t startHost, uint8_t endHost) {
 
   if (capturing && uncommittedPkts > 0) commitCaptureFile();
 
-  Serial.printf("[RECON] ARP sweep done. %u sent, %u hosts found.\n", sent, found);
+  Serial.printf("[RECON] ARP sweep done. %u sent, %u hosts found.\n",
+    (unsigned)sent, (unsigned)found);
   idsSetLed(capturing ? COLOR_GREEN : COLOR_BLUE);
 }
 
@@ -3120,8 +3139,7 @@ void parseReconCommand(const char *cmd) {
     while (*cmd == ' ') cmd++;
 
     uint8_t baseIP[4];
-    uint8_t startHost = 1;
-    uint8_t endHost = 254;
+    int cidr = 24;  // default: /24
 
     if (*cmd == '\0') {
       // No argument — sweep our own subnet
@@ -3131,7 +3149,7 @@ void parseReconCommand(const char *cmd) {
         return;
       }
     } else {
-      // Parse: X.X.X.X or X.X.X.X/24
+      // Parse: X.X.X.X or X.X.X.X/NN
       char ipStr[20];
       const char *slash = strchr(cmd, '/');
       int ipLen;
@@ -3139,16 +3157,15 @@ void parseReconCommand(const char *cmd) {
       if (slash) {
         ipLen = slash - cmd;
         if (ipLen <= 0 || ipLen >= (int)sizeof(ipStr)) {
-          Serial.println("[RECON] Usage: recon sweep [X.X.X.X/24]");
+          Serial.println("[RECON] Usage: recon sweep [X.X.X.X/NN]");
           return;
         }
         memcpy(ipStr, cmd, ipLen);
         ipStr[ipLen] = '\0';
 
-        // Parse CIDR (we only support /24 for now)
-        int cidr = atoi(slash + 1);
-        if (cidr != 24) {
-          Serial.println("[RECON] Only /24 sweep is supported for now.");
+        cidr = atoi(slash + 1);
+        if (cidr < 16 || cidr > 30) {
+          Serial.println("[RECON] CIDR must be between /16 and /30.");
           return;
         }
       } else {
@@ -3165,7 +3182,14 @@ void parseReconCommand(const char *cmd) {
       }
     }
 
-    reconArpSweep(baseIP, startHost, endHost);
+    // Compute network base and broadcast from the CIDR
+    uint32_t baseU32 = ((uint32_t)baseIP[0] << 24) | ((uint32_t)baseIP[1] << 16)
+                     | ((uint32_t)baseIP[2] <<  8) |  (uint32_t)baseIP[3];
+    uint32_t mask = (cidr == 0) ? 0 : (0xFFFFFFFFUL << (32 - cidr));
+    uint32_t network   = baseU32 & mask;
+    uint32_t broadcast = network | ~mask;
+
+    reconArpSweep(network, broadcast);
   }
   else if (strncmp(cmd, "ports", 5) == 0) {
     cmd += 5;

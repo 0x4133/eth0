@@ -255,6 +255,7 @@ Discover all live hosts on a subnet by sending ARP "who-has" requests.
 ```
 recon sweep                    # Sweep our own /24 subnet
 recon sweep 192.168.1.0/24     # Sweep a specific subnet
+recon sweep 192.168.0.0/22     # Sweep a wider range (/16 to /30)
 ```
 
 Output:
