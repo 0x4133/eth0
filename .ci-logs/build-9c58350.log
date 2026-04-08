@@ -1,0 +1,161 @@
+/home/runner/work/eth0/eth0/eth0/attack_dhcp_starve.cpp: In function 'void dhcpStarveSendDiscover()':
+/home/runner/work/eth0/eth0/eth0/attack_dhcp_starve.cpp:48:12: warning: unused variable 'udpStart' [-Wunused-variable]
+   uint16_t udpStart = pos;
+            ^~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_dhcp_starve.cpp:59:12: warning: unused variable 'dhcpStart' [-Wunused-variable]
+   uint16_t dhcpStart = pos;
+            ^~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_dns_spoof.cpp: In function 'void dnsSpoofSendResponse(const uint8_t*, uint16_t, const uint8_t*, uint8_t, const uint8_t*)':
+/home/runner/work/eth0/eth0/eth0/attack_dns_spoof.cpp:194:12: warning: unused variable 'dnsStart' [-Wunused-variable]
+   uint16_t dnsStart = pos;
+            ^~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_tcp_rst.cpp: In function 'void parseKillCommand(const char*)':
+/home/runner/work/eth0/eth0/eth0/attack_tcp_rst.cpp:158:21: warning: format '%u' expects argument of type 'unsigned int', but argument 13 has type 'long unsigned int' [-Wformat=]
+       Serial.printf("  %u.%u.%u.%u:%u <-> %u.%u.%u.%u:%u (%us ago)\n", c.srcIP[0], c.srcIP[1],
+                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_tcp_rst.cpp:160:44:
+                     c.dstIP[3], c.dstPort, (millis() - c.lastSeen) / 1000);
+                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_nbns_poison.cpp: In function 'void poisonCheckPacket(const uint8_t*, uint16_t)':
+/home/runner/work/eth0/eth0/eth0/attack_nbns_poison.cpp:81:14: warning: unused variable 'uStart' [-Wunused-variable]
+     uint16_t uStart = pos;
+              ^~~~~~
+/home/runner/work/eth0/eth0/eth0/eth0.ino: In function 'void setup()':
+/home/runner/work/eth0/eth0/eth0/eth0.ino:296:21: warning: format '%lu' expects argument of type 'long unsigned int', but argument 4 has type 'uint32_t' {aka 'unsigned int'} [-Wformat=]
+       Serial.printf("[SD] Retry %d/4 at %lu Hz...\n", attempt, speed);
+                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~           ~~~~~
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp: In function 'void pcapSerialPacket(const uint8_t*, uint16_t)':
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:89:9: warning: 'void* memcpy(void*, const void*, size_t)' forming offset [3, 4] is out of the bounds [0, 2] of object 'len' with type 'uint16_t' {aka 'short unsigned int'} [-Warray-bounds]
+   memcpy(phdr + 8, &len, 4);   // incl_len (little-endian on ESP32)
+   ~~~~~~^~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:80:52: note: 'len' declared here
+ void pcapSerialPacket(const uint8_t* pkt, uint16_t len) {
+                                           ~~~~~~~~~^~~
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:90:9: warning: 'void* memcpy(void*, const void*, size_t)' forming offset [3, 4] is out of the bounds [0, 2] of object 'len' with type 'uint16_t' {aka 'short unsigned int'} [-Warray-bounds]
+   memcpy(phdr + 12, &len, 4);  // orig_len
+   ~~~~~~^~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:80:52: note: 'len' declared here
+ void pcapSerialPacket(const uint8_t* pkt, uint16_t len) {
+                                           ~~~~~~~~~^~~
+/home/runner/work/eth0/eth0/eth0/ids.cpp: In function 'void parseIdsCommand(const char*)':
+/home/runner/work/eth0/eth0/eth0/ids.cpp:656:21: warning: format '%u' expects argument of type 'unsigned int', but argument 13 has type 'long unsigned int' [-Wformat=]
+       Serial.printf("  %u.%u.%u.%u -> %02X:%02X:%02X:%02X:%02X:%02X (seen %us ago)\n",
+                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/ids.cpp:660:21:
+                     (millis() - arpTable[i].lastSeen) / 1000);
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/inject.cpp: In function 'void sendUDP(const uint8_t*, uint16_t, const char*, uint16_t)':
+/home/runner/work/eth0/eth0/eth0/inject.cpp:165:12: warning: unused variable 'udpStart' [-Wunused-variable]
+   uint16_t udpStart = pos;
+            ^~~~~~~~
+/home/runner/work/eth0/eth0/eth0/network_map.cpp: In function 'void printNetworkMap()':
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:113:19: error: 'originalMAC' was not declared in this scope
+   if (memcmp(mac, originalMAC, 6) != 0)
+                   ^~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:126:7: error: 'mitmActive' was not declared in this scope
+   if (mitmActive) {
+       ^~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:126:7: note: suggested alternative: 'anyActive'
+   if (mitmActive) {
+       ^~~~~~~~~~
+       anyActive
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:130:7: error: 'dnsSpoofEnabled' was not declared in this scope
+   if (dnsSpoofEnabled) {
+       ^~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:130:7: note: suggested alternative: 'idsEnabled'
+   if (dnsSpoofEnabled) {
+       ^~~~~~~~~~~~~~~
+       idsEnabled
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:134:7: error: 'poisonEnabled' was not declared in this scope
+   if (poisonEnabled) {
+       ^~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:134:7: note: suggested alternative: 'idsEnabled'
+   if (poisonEnabled) {
+       ^~~~~~~~~~~~~
+       idsEnabled
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:138:7: error: 'dhcpStarveActive' was not declared in this scope
+   if (dhcpStarveActive) {
+       ^~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:142:7: error: 'tunnelActive' was not declared in this scope
+   if (tunnelActive) {
+       ^~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:142:7: note: suggested alternative: 'anyActive'
+   if (tunnelActive) {
+       ^~~~~~~~~~~~
+       anyActive
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:283:26: error: 'mitmActive' was not declared in this scope
+     bool isMitmTarget = (mitmActive && memcmp(arpTable[i].ip, mitmVictimIP, 4) == 0);
+                          ^~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:283:26: note: suggested alternative: 'anyActive'
+     bool isMitmTarget = (mitmActive && memcmp(arpTable[i].ip, mitmVictimIP, 4) == 0);
+                          ^~~~~~~~~~
+                          anyActive
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:283:63: error: 'mitmVictimIP' was not declared in this scope
+     bool isMitmTarget = (mitmActive && memcmp(arpTable[i].ip, mitmVictimIP, 4) == 0);
+                                                               ^~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:327:74: error: 'packetCount' was not declared in this scope
+   Serial.printf("    Packets: %u captured  |  %.1f pkt/s  |  %u sent\n", packetCount, pps, txCount);
+                                                                          ^~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:327:74: note: suggested alternative: 'packetBuf'
+   Serial.printf("    Packets: %u captured  |  %.1f pkt/s  |  %u sent\n", packetCount, pps, txCount);
+                                                                          ^~~~~~~~~~~
+                                                                          packetBuf
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:327:92: error: 'txCount' was not declared in this scope
+   Serial.printf("    Packets: %u captured  |  %.1f pkt/s  |  %u sent\n", packetCount, pps, txCount);
+                                                                                            ^~~~~~~
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:327:92: note: suggested alternative: 'tcpCount'
+   Serial.printf("    Packets: %u captured  |  %.1f pkt/s  |  %u sent\n", packetCount, pps, txCount);
+                                                                                            ^~~~~~~
+                                                                                            tcpCount
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:328:17: warning: format '%u' expects argument of type 'unsigned int', but argument 3 has type 'long unsigned int' [-Wformat=]
+   Serial.printf("    Uptime: %us  |  Free heap: %u bytes\n", millis() / 1000, ESP.getFreeHeap());
+                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/nvs_config.cpp: In function 'void configSave()':
+/home/runner/work/eth0/eth0/eth0/nvs_config.cpp:40:33: error: 'statsAutoEnabled' was not declared in this scope
+   nvsPrefs.putBool("statsAuto", statsAutoEnabled);
+                                 ^~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/nvs_config.cpp:40:33: note: suggested alternative: 'syslogEnabled'
+   nvsPrefs.putBool("statsAuto", statsAutoEnabled);
+                                 ^~~~~~~~~~~~~~~~
+                                 syslogEnabled
+/home/runner/work/eth0/eth0/eth0/nvs_config.cpp:41:33: error: 'statsAutoInterval' was not declared in this scope
+   nvsPrefs.putUInt("statsIntv", statsAutoInterval);
+                                 ^~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/nvs_config.cpp:41:33: note: suggested alternative: 'sntp_get_sync_interval'
+   nvsPrefs.putUInt("statsIntv", statsAutoInterval);
+                                 ^~~~~~~~~~~~~~~~~
+                                 sntp_get_sync_interval
+/home/runner/work/eth0/eth0/eth0/nvs_config.cpp: In function 'void configLoad()':
+/home/runner/work/eth0/eth0/eth0/nvs_config.cpp:76:3: error: 'statsAutoEnabled' was not declared in this scope
+   statsAutoEnabled = nvsPrefs.getBool("statsAuto", false);
+   ^~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/nvs_config.cpp:76:3: note: suggested alternative: 'syslogEnabled'
+   statsAutoEnabled = nvsPrefs.getBool("statsAuto", false);
+   ^~~~~~~~~~~~~~~~
+   syslogEnabled
+/home/runner/work/eth0/eth0/eth0/nvs_config.cpp:77:3: error: 'statsAutoInterval' was not declared in this scope
+   statsAutoInterval = nvsPrefs.getUInt("statsIntv", STATS_INTERVAL_DEFAULT);
+   ^~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/nvs_config.cpp:77:3: note: suggested alternative: 'sntp_get_sync_interval'
+   statsAutoInterval = nvsPrefs.getUInt("statsIntv", STATS_INTERVAL_DEFAULT);
+   ^~~~~~~~~~~~~~~~~
+   sntp_get_sync_interval
+/home/runner/work/eth0/eth0/eth0/nvs_config.cpp:93:5: error: 'statsLastAuto' was not declared in this scope
+     statsLastAuto = millis();
+     ^~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/packet_replay.cpp: In function 'void replayPcap(const char*, uint32_t)':
+/home/runner/work/eth0/eth0/eth0/packet_replay.cpp:52:3: error: 'idsSetLed' was not declared in this scope
+   idsSetLed(COLOR_YELLOW);
+   ^~~~~~~~~
+
+[92mUsed library[0m      [92mVersion[0m [90mPath[0m
+[93mAdafruit NeoPixel[0m 1.12.3  [90m/home/runner/Arduino/libraries/Adafruit_NeoPixel[0m
+[93mEthernet2[0m         1.0.4   [90m/home/runner/Arduino/libraries/Ethernet2[0m
+[93mSPI[0m               2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/SPI[0m
+[93mPreferences[0m       2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/Preferences[0m
+[93mSD[0m                2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/SD[0m
+[93mFS[0m                2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/FS[0m
+
+[92mUsed platform[0m [92mVersion[0m [90mPath[0m
+[93mesp32:esp32[0m   2.0.17  [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17[0m
+Error during build: exit status 1
