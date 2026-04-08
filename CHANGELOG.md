@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `docs/ARCHITECTURE.md` — module map, runtime control flow, state
+  ownership rules, and the rationale for the per-subsystem extern
+  pattern.
+- `docs/PROTOCOLS.md` — wire-format specs for the four custom
+  protocols (TP-Link Kasa, AES-128-CBC UDP tunnel, DNS covert
+  channel, IRC server) plus the PCAP-on-Serial framing.
+- `tests/` host-side unit tests (45 assertions across `parseIP`,
+  `parseMAC`, `pktRead16/32`, `pktWrite16/32`, `ipChecksum`,
+  `dnsDecodeName`, and CIDR math). Runs under plain `g++` on
+  Linux without the ESP32 toolchain.
+- `host-tests` GitHub Actions workflow gating every push.
+- 35+ new sketch-folder modules under `eth0/` covering capture,
+  inject, IDS, recon, attack, services, stats, network map,
+  hexdump, and persistent config. The original 9,254-line
+  monolithic `eth0.ino` is now ~1,200 lines (entry points +
+  serial dispatcher only).
 - Apache-2.0 `LICENSE` and `NOTICE` at repository root.
 - Repository hygiene: `.gitignore`, `.gitattributes`, `.editorconfig`,
   `.clang-format`.
@@ -29,6 +45,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of being hard-coded to `/24`.
 
 ### Changed
+- `README.md` slimmed from 1,697 lines to ~150 lines: project
+  overview, quickstart, feature matrix, and links into `docs/`.
+  The full feature reference moved verbatim to
+  `docs/FEATURES.md`.
 - Moved `esp32-s3-ETH.png` from the repository root to
   `docs/images/esp32-s3-eth.png`.
 - Moved `chat.ps1` and `eth0-listener.ps1` from the repository root to
