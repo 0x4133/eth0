@@ -14,6 +14,7 @@ extern bool     covertActive;
 extern uint8_t  covertServerIP[4];
 extern char     covertDomain[64];
 extern uint32_t covertSeq;
+extern uint32_t covertSentCount;
 
 void covertDnsSend(const char* data, uint16_t dataLen);
 void parseCovertCommand(const char* cmd);

@@ -9,9 +9,13 @@
 
 #include <Arduino.h>
 #include <Ethernet2.h>
+#include <utility/socket.h>
+#include <utility/w5500.h>
 
 #include "arp_table.h"
 #include "config.h"
+#include "eth_frame.h"
+#include "ids.h"
 #include "inject.h"
 #include "ip_util.h"
 #include "state.h"

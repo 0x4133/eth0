@@ -18,6 +18,7 @@ bool     covertActive       = false;
 uint8_t  covertServerIP[4]  = {0};
 char     covertDomain[64]   = "c.local";
 uint32_t covertSeq          = 0;
+uint32_t covertSentCount    = 0;
 
 // ══════════════════════════════════════════════════════════════
 //  10. DNS Covert Channel

@@ -9,6 +9,7 @@
 
 #include "config.h"
 #include "eth_frame.h"
+#include "ids.h"
 #include "pcap_writer.h"
 
 StatsTalker statsTalkers[STATS_TALKER_TABLE];
