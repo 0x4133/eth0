@@ -58,6 +58,7 @@
 #include "config.h"
 #include "eth_frame.h"
 #include "ip_util.h"
+#include "pcap_writer.h"
 #include "pins.h"
 #include "spi_bus.h"
 #include "state.h"
@@ -67,16 +68,8 @@
 // SPI ownership and the `sdSPI` handle live in spi_bus.{h,cpp}.
 
 // packetBuf, txBuf, and capturing live in state.{h,cpp}.
-
-// Capture-internal state (moves to pcap_writer.cpp in Phase 4f).
-File captureFile;
-uint32_t packetCount = 0;
-uint32_t droppedCount = 0;
-uint32_t txCount = 0;
-uint32_t fileIndex = 0;
-uint32_t lastCommit = 0;
-uint32_t uncommittedPkts = 0;
-char currentFilename[32];  // track current filename for close/reopen
+// captureFile, packetCount, droppedCount, txCount, fileIndex,
+// lastCommit, uncommittedPkts, currentFilename live in pcap_writer.{h,cpp}.
 
 // IRC server config constants live in config.h.
 
@@ -382,30 +375,12 @@ struct PacketFilter {
 
 PacketFilter activeFilter = {FILTER_NONE};
 
-// ── PCAP file format structures ──
-struct PcapGlobalHeader {
-  uint32_t magic_number;
-  uint16_t version_major;
-  uint16_t version_minor;
-  int32_t thiszone;
-  uint32_t sigfigs;
-  uint32_t snaplen;
-  uint32_t network;
-};
-
-struct PcapPacketHeader {
-  uint32_t ts_sec;
-  uint32_t ts_usec;
-  uint32_t incl_len;
-  uint32_t orig_len;
-};
+// PcapGlobalHeader and PcapPacketHeader live in pcap_writer.h.
 
 // ── Forward declarations ──
 void resetW5500();
-bool openNewCaptureFile();
-void commitCaptureFile();
-void writePcapGlobalHeader();
-void writePcapPacket(const uint8_t* data, uint16_t len);
+// openNewCaptureFile, commitCaptureFile, writePcapGlobalHeader,
+// writePcapPacket are declared in pcap_writer.h.
 // IRC Server
 void parseIrcCommand(const char* cmd);
 void ircStart();
@@ -1643,72 +1618,8 @@ void resetW5500() {
   Serial.println("[ETH] W5500 reset complete.");
 }
 
-bool openNewCaptureFile() {
-  do {
-    snprintf(currentFilename, sizeof(currentFilename), "/capture_%04u.pcap", fileIndex);
-    fileIndex++;
-  } while (SD.exists(currentFilename) && fileIndex < 9999);
-
-  captureFile = SD.open(currentFilename, FILE_WRITE);
-  if (!captureFile)
-    return false;
-
-  writePcapGlobalHeader();
-  captureFile.close();  // commit the header immediately
-
-  // Reopen for append
-  captureFile = SD.open(currentFilename, FILE_APPEND);
-  if (!captureFile)
-    return false;
-
-  uncommittedPkts = 0;
-  lastCommit = millis();
-
-  Serial.printf("[SD] Opened %s\n", currentFilename);
-  return true;
-}
-
-// Close and reopen the current capture file.
-// close() forces the FAT directory entry (file size, cluster chain) to disk.
-// If power dies after close(), the file is intact and readable.
-// We reopen in append mode to continue writing.
-void commitCaptureFile() {
-  captureFile.close();
-  captureFile = SD.open(currentFilename, FILE_APPEND);
-  if (!captureFile) {
-    Serial.println("[ERROR] Failed to reopen capture file after commit!");
-    capturing = false;
-    return;
-  }
-  uncommittedPkts = 0;
-  lastCommit = millis();
-}
-
-void writePcapGlobalHeader() {
-  PcapGlobalHeader hdr;
-  hdr.magic_number = 0xa1b2c3d4;
-  hdr.version_major = 2;
-  hdr.version_minor = 4;
-  hdr.thiszone = 0;
-  hdr.sigfigs = 0;
-  hdr.snaplen = MAX_FRAME_SIZE;
-  hdr.network = 1;
-
-  captureFile.write((const uint8_t*)&hdr, sizeof(hdr));
-}
-
-void writePcapPacket(const uint8_t* data, uint16_t len) {
-  uint32_t ms = millis();
-
-  PcapPacketHeader phdr;
-  phdr.ts_sec = ms / 1000;
-  phdr.ts_usec = (ms % 1000) * 1000;
-  phdr.incl_len = len;
-  phdr.orig_len = len;
-
-  captureFile.write((const uint8_t*)&phdr, sizeof(phdr));
-  captureFile.write(data, len);
-}
+// openNewCaptureFile, commitCaptureFile, writePcapGlobalHeader, writePcapPacket
+// live in pcap_writer.cpp.
 
 // ══════════════════════════════════════════════════════════════
 //  IDS / Intrusion Detection System
