@@ -28,6 +28,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `docs/images/esp32-s3-eth.png`.
 - Moved `chat.ps1` and `eth0-listener.ps1` from the repository root to
   `tools/`.
+- `NOTICE` trimmed to list only the libraries actually linked into the
+  firmware (`Adafruit NeoPixel`, `Ethernet2`).
+
+### Removed
+- Deleted the vendored `libs/` directory (10 third-party library trees,
+  484 files, ~182k lines). Dependencies are now resolved via the
+  Arduino Library Manager at the versions pinned in `CONTRIBUTING.md`
+  and enforced by the `build` CI workflow. Eight of the ten libraries
+  (`Ethernet`, `Ethernet_Generic`, `ETHClass2`, `ESP32-BLE-Keyboard`,
+  `ESP32-BLE-Mouse`, `ModbusMaster`, `StreamDebugger`, `pubsubclient`)
+  were never `#include`d by the sketch and had no runtime effect; the
+  remaining two (`Ethernet2`, `Adafruit_NeoPixel`) are now installed
+  from the Library Manager.
 
 ### Fixed
 - `recon sweep` no longer reports an inflated progress denominator;

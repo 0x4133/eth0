@@ -1,55 +1,24 @@
 eth0 - ESP32-S3 Network Security Tool
 Copyright 2026 0x4133
 
-This product includes software developed by third parties. The following
-libraries are used at build time via the Arduino Library Manager and are
-licensed separately from this project:
+This product is built on top of the Arduino ESP32 core and uses the
+following third-party libraries at build time. These libraries are
+installed via the Arduino Library Manager (or arduino-cli) at pinned
+versions; they are NOT redistributed as part of this source tree.
 
   - Adafruit NeoPixel Library
       Copyright (c) Adafruit Industries
       Licensed under LGPL-3.0-or-later
       https://github.com/adafruit/Adafruit_NeoPixel
 
-  - Arduino Ethernet Library
-      Copyright (c) Arduino LLC, WIZnet Co., Ltd.
-      Licensed under LGPL-2.1-or-later
-      https://github.com/arduino-libraries/Ethernet
-
   - Ethernet2 Library
-      Copyright (c) Adafruit Industries, WIZnet Co., Ltd.
+      Copyright (c) Arduino LLC, WIZnet Co., Ltd., Adafruit Industries
       Licensed under LGPL-2.1-or-later
+      https://github.com/adafruit/Ethernet2
 
-  - Ethernet_Generic Library
-      Copyright (c) Khoi Hoang
-      Licensed under GPL-3.0
-      https://github.com/khoih-prog/Ethernet_Generic
+The ESP32 Arduino core itself (https://github.com/espressif/arduino-esp32)
+provides SPI, SD, Preferences, and mbedtls support and is licensed
+under LGPL-2.1-or-later; it is not redistributed here.
 
-  - PubSubClient
-      Copyright (c) Nicholas O'Leary
-      Licensed under MIT
-      https://github.com/knolleary/pubsubclient
-
-  - ModbusMaster
-      Copyright (c) Doc Walker
-      Licensed under Apache-2.0
-      https://github.com/4-20ma/ModbusMaster
-
-  - ESP32-BLE-Keyboard
-      Copyright (c) T-vK
-      Licensed under MIT-like (see project)
-      https://github.com/T-vK/ESP32-BLE-Keyboard
-
-  - ESP32-BLE-Mouse
-      Copyright (c) T-vK
-      Licensed under MIT-like (see project)
-      https://github.com/T-vK/ESP32-BLE-Mouse
-
-  - StreamDebugger
-      Copyright (c) Volodymyr Shymanskyy
-      Licensed under LGPL-3.0
-
-  - ETHClass2
-      Copyright (c) Contributors
-      Licensed as indicated in the source
-
-Redistributions of this project must retain this NOTICE file.
+Redistributions of this project must retain this NOTICE file, per
+Section 4(d) of the Apache License, Version 2.0.
