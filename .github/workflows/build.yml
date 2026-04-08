@@ -73,7 +73,12 @@ jobs:
           arduino-cli lib list
 
       - name: Compile eth0 sketch
+        # GitHub Actions runs `bash -e` by default; we explicitly turn
+        # it off here so the diagnostic-emitting loop below survives a
+        # failed compile.
+        shell: bash
         run: |
+          set +e
           set -o pipefail
           arduino-cli compile \
             --fqbn "${FQBN}" \
