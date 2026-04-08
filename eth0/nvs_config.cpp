@@ -12,6 +12,7 @@
 #include "filter.h"
 #include "ids.h"
 #include "state.h"
+#include "stats.h"
 #include "svc_syslog.h"
 
 Preferences nvsPrefs;

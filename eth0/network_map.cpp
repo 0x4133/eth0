@@ -9,9 +9,15 @@
 #include <Arduino.h>
 
 #include "arp_table.h"
+#include "attack_arp_mitm.h"
+#include "attack_dhcp_starve.h"
+#include "attack_dns_spoof.h"
+#include "attack_mac_spoof.h"
+#include "attack_nbns_poison.h"
 #include "attack_tcp_rst.h"
 #include "config.h"
 #include "ids.h"
+#include "pcap_writer.h"
 #include "recon_lldp.h"
 #include "recon_mdns.h"
 #include "recon_netbios.h"
@@ -19,6 +25,7 @@
 #include "recon_stp.h"
 #include "state.h"
 #include "stats.h"
+#include "svc_udp_tunnel.h"
 
 // ══════════════════════════════════════════════════════════════
 //  Network Map — Unified view of all discovered intelligence

@@ -9,6 +9,7 @@
 #include <SD.h>
 
 #include "config.h"
+#include "ids.h"
 #include "inject.h"
 #include "pcap_writer.h"
 #include "state.h"
