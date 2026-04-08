@@ -152,10 +152,9 @@ Adafruit_NeoPixel pixel(1, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
 // ── mDNS/NBNS Sniffer State ──
 // MdnsHost / mdnsTable live in recon_mdns.{h,cpp}.
 
-// ── Encrypted UDP Tunnel State ──
-uint32_t covertSentCount = 0;
-
-// ── Kasa Smart Device State ──
+// Encrypted UDP Tunnel state lives in svc_udp_tunnel.{h,cpp}.
+// DNS Covert Channel state lives in svc_dns_covert.{h,cpp}.
+// Kasa state lives in svc_kasa.{h,cpp}.
 
 // FilterType, PacketFilter, and `activeFilter` live in filter.{h,cpp}.
 
