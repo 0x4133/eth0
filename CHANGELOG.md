@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `docs/images/` directory housing diagrams previously loose in the
   repository root.
 - `tools/` directory for host-side helper scripts.
+- GitHub Actions `build` workflow compiling the sketch with
+  `arduino-cli` on every push and pull request, against pinned ESP32
+  core and library versions matching `CONTRIBUTING.md`. Built firmware
+  is uploaded as a CI artifact with a 14-day retention.
 - ARP sweep now accepts arbitrary CIDRs in the `/16`–`/30` range instead
   of being hard-coded to `/24`.
 

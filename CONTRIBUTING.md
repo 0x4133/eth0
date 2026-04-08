@@ -41,11 +41,11 @@ eth0 is built with the **Arduino IDE 2.x**.
 
 | Library | Version |
 |---|---|
-| Adafruit NeoPixel | 1.12.0 |
-| Ethernet (arduino-libraries) | 2.0.2 |
+| Adafruit NeoPixel | 1.12.3 |
 | Ethernet2 | 1.0.4 |
-| PubSubClient | 2.8 |
-| ModbusMaster | 2.0.1 |
+
+The sketch only `#include`s these two third-party libraries plus the
+ESP32 core (for `SPI`, `SD`, `Preferences`, `mbedtls/aes`).
 
 ### Building
 

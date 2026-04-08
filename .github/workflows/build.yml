@@ -1,0 +1,101 @@
+# Compile the eth0 Arduino sketch headlessly with arduino-cli.
+#
+# This is the same toolchain the Arduino IDE uses — arduino-cli IS the
+# Arduino IDE's build system, just scriptable. Version pins below MUST
+# stay in sync with docs/BUILDING.md and CONTRIBUTING.md so local and CI
+# builds produce identical firmware.
+
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# A second push to the same branch should cancel the earlier run.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  compile:
+    name: arduino-cli compile (esp32s3)
+    runs-on: ubuntu-latest
+
+    env:
+      # Pinned versions — keep in sync with CONTRIBUTING.md and docs/HARDWARE.md.
+      ESP32_CORE_VERSION: 2.0.17
+      ETHERNET2_VERSION: 1.0.4
+      NEOPIXEL_VERSION: 1.12.3
+
+      # Board FQBN matches the Arduino IDE settings in docs/HARDWARE.md.
+      FQBN: esp32:esp32:esp32s3:USBMode=default,CDCOnBoot=cdc,FlashSize=16M,PartitionScheme=default_16MB,PSRAM=opi
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install arduino-cli
+        uses: arduino/setup-arduino-cli@v2
+
+      - name: Cache arduino-cli data
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.arduino15
+            ~/Arduino
+          key: arduino-${{ runner.os }}-esp32-${{ env.ESP32_CORE_VERSION }}-eth2-${{ env.ETHERNET2_VERSION }}-np-${{ env.NEOPIXEL_VERSION }}
+          restore-keys: |
+            arduino-${{ runner.os }}-esp32-${{ env.ESP32_CORE_VERSION }}-
+
+      - name: Configure arduino-cli
+        run: |
+          arduino-cli config init --overwrite
+          arduino-cli config add board_manager.additional_urls \
+            https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          arduino-cli core update-index
+
+      - name: Install ESP32 core
+        run: |
+          arduino-cli core install "esp32:esp32@${ESP32_CORE_VERSION}"
+          arduino-cli core list
+
+      - name: Install pinned libraries
+        run: |
+          arduino-cli lib install "Ethernet2@${ETHERNET2_VERSION}"
+          arduino-cli lib install "Adafruit NeoPixel@${NEOPIXEL_VERSION}"
+          arduino-cli lib list
+
+      - name: Compile eth0 sketch
+        run: |
+          arduino-cli compile \
+            --fqbn "${FQBN}" \
+            --warnings more \
+            --export-binaries \
+            --output-dir build \
+            eth0/
+
+      - name: Report firmware size
+        run: |
+          echo "── Firmware artifacts ──"
+          ls -la build/
+          if [ -f build/eth0.ino.bin ]; then
+            size=$(stat -c %s build/eth0.ino.bin)
+            echo "Firmware binary: ${size} bytes ($((size / 1024)) KB)"
+          fi
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: eth0-firmware-${{ github.sha }}
+          path: |
+            build/eth0.ino.bin
+            build/eth0.ino.elf
+            build/eth0.ino.map
+          if-no-files-found: warn
+          retention-days: 14
