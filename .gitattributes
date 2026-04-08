@@ -1,0 +1,37 @@
+# Normalize line endings on checkin; check out as LF on all platforms.
+* text=auto eol=lf
+
+# Explicit text files
+*.ino     text eol=lf
+*.h       text eol=lf
+*.c       text eol=lf
+*.cpp     text eol=lf
+*.hpp     text eol=lf
+*.md      text eol=lf
+*.txt     text eol=lf
+*.json    text eol=lf
+*.yml     text eol=lf
+*.yaml    text eol=lf
+*.sh      text eol=lf
+*.ps1     text eol=crlf
+*.bat     text eol=crlf
+
+# Binary files - never touch
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.ico     binary
+*.bin     binary
+*.elf     binary
+*.hex     binary
+*.pcap    binary
+*.pcapng  binary
+*.pdf     binary
+*.zip     binary
+
+# Keep GitHub's language stats focused on our code, not vendored libraries.
+libs/**          linguist-vendored=true
+libraries/**     linguist-vendored=true
+third_party/**   linguist-vendored=true
+docs/**          linguist-documentation=true

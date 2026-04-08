@@ -1,0 +1,55 @@
+eth0 - ESP32-S3 Network Security Tool
+Copyright 2026 0x4133
+
+This product includes software developed by third parties. The following
+libraries are used at build time via the Arduino Library Manager and are
+licensed separately from this project:
+
+  - Adafruit NeoPixel Library
+      Copyright (c) Adafruit Industries
+      Licensed under LGPL-3.0-or-later
+      https://github.com/adafruit/Adafruit_NeoPixel
+
+  - Arduino Ethernet Library
+      Copyright (c) Arduino LLC, WIZnet Co., Ltd.
+      Licensed under LGPL-2.1-or-later
+      https://github.com/arduino-libraries/Ethernet
+
+  - Ethernet2 Library
+      Copyright (c) Adafruit Industries, WIZnet Co., Ltd.
+      Licensed under LGPL-2.1-or-later
+
+  - Ethernet_Generic Library
+      Copyright (c) Khoi Hoang
+      Licensed under GPL-3.0
+      https://github.com/khoih-prog/Ethernet_Generic
+
+  - PubSubClient
+      Copyright (c) Nicholas O'Leary
+      Licensed under MIT
+      https://github.com/knolleary/pubsubclient
+
+  - ModbusMaster
+      Copyright (c) Doc Walker
+      Licensed under Apache-2.0
+      https://github.com/4-20ma/ModbusMaster
+
+  - ESP32-BLE-Keyboard
+      Copyright (c) T-vK
+      Licensed under MIT-like (see project)
+      https://github.com/T-vK/ESP32-BLE-Keyboard
+
+  - ESP32-BLE-Mouse
+      Copyright (c) T-vK
+      Licensed under MIT-like (see project)
+      https://github.com/T-vK/ESP32-BLE-Mouse
+
+  - StreamDebugger
+      Copyright (c) Volodymyr Shymanskyy
+      Licensed under LGPL-3.0
+
+  - ETHClass2
+      Copyright (c) Contributors
+      Licensed as indicated in the source
+
+Redistributions of this project must retain this NOTICE file.
