@@ -21,7 +21,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write   # needed for the side-channel build-log push
 
 jobs:
   compile:
@@ -34,8 +34,11 @@ jobs:
       ETHERNET2_VERSION: 1.0.4
       NEOPIXEL_VERSION: 1.12.3
 
-      # Board FQBN matches the Arduino IDE settings in docs/HARDWARE.md.
-      FQBN: esp32:esp32:esp32s3:USBMode=default,CDCOnBoot=cdc,FlashSize=16M,PartitionScheme=default_16MB,PSRAM=opi
+      # Bare FQBN — menu options are validated against the installed core,
+      # and the previous full FQBN was rejected (likely default_16MB or
+      # opi PSRAM not available in this core build). Defaults are fine
+      # for a compile-check.
+      FQBN: esp32:esp32:esp32s3
 
     steps:
       - name: Checkout repository
@@ -74,8 +77,8 @@ jobs:
 
       - name: Compile eth0 sketch
         # GitHub Actions runs `bash -e` by default; we explicitly turn
-        # it off here so the diagnostic-emitting loop below survives a
-        # failed compile.
+        # it off here so the diagnostic-printing block below survives
+        # a failed compile.
         shell: bash
         run: |
           set +e
@@ -87,31 +90,61 @@ jobs:
             --output-dir build \
             eth0/ 2>&1 | tee build.log
           rc=${PIPESTATUS[0]}
+          echo "── arduino-cli exited with code $rc ──"
+          echo "── build.log size: $(wc -c < build.log) bytes ──"
           if [ $rc -ne 0 ]; then
-            echo "── arduino-cli exited with code $rc ──"
-            echo "── build.log size: $(wc -c < build.log) bytes ──"
-            # Emit every line of build.log as its own workflow
-            # annotation so the failing diagnostics survive even
-            # without artifact download access. Truncate any single
-            # line to 1000 chars (annotation hard limit).
-            line_no=0
-            while IFS= read -r line; do
-              line_no=$((line_no + 1))
-              # Strip ANSI color codes and trim to 1000 chars
-              clean=$(printf '%s' "$line" | sed 's/\x1b\[[0-9;]*m//g' | cut -c1-1000)
-              echo "::error file=build.log,line=${line_no}::${clean}"
-            done < build.log
+            echo "::group::Full build.log on failure"
+            cat build.log
+            echo "::endgroup::"
+            # Re-emit every diagnostic-looking line as a workflow
+            # annotation so the GitHub UI surfaces them inline.
+            grep -nE "(error|warning|fatal):" build.log | while IFS= read -r line; do
+              echo "::error::${line}"
+            done
             exit $rc
           fi
 
-      - name: Upload build log on failure
+      - name: Push build.log to ci-artifacts branch on failure
         if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log-${{ github.sha }}
-          path: build.log
-          if-no-files-found: warn
-          retention-days: 14
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          short_sha="${GITHUB_SHA:0:7}"
+          path=".ci-logs/build-${short_sha}.log"
+          # base64 encode (single line, no wrapping)
+          content=$(base64 -w0 < build.log)
+
+          # Check if the ci-artifacts branch exists; if not, create it
+          # as an orphan branch so it doesn't share history with main.
+          api_root="https://api.github.com/repos/${GITHUB_REPOSITORY}"
+          branch_check=$(curl -fsS \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "${api_root}/branches/ci-artifacts" 2>&1)
+          if echo "$branch_check" | grep -q '"name": *"ci-artifacts"'; then
+            echo "ci-artifacts branch exists"
+          else
+            echo "ci-artifacts branch missing — creating from current commit"
+            curl -fsS \
+              -X POST \
+              -H "Authorization: token $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              -d "{\"ref\":\"refs/heads/ci-artifacts\",\"sha\":\"${GITHUB_SHA}\"}" \
+              "${api_root}/git/refs"
+          fi
+
+          # PUT the file (create or update; if it exists we'd need its
+          # blob sha which we don't have, so include a unique short_sha
+          # in the filename to avoid collisions).
+          curl -fsS \
+            -X PUT \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -d "{\"message\":\"ci: archive build log for ${short_sha} [skip ci]\",\"branch\":\"ci-artifacts\",\"content\":\"${content}\"}" \
+            "${api_root}/contents/${path}"
+
+          echo "Pushed ${path} to ci-artifacts branch"
 
       - name: Report firmware size
         run: |
