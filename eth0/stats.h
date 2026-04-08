@@ -39,5 +39,8 @@ void statsTrackPacket(const uint8_t* pkt, uint16_t len);
 // Print the current snapshot to Serial.
 void statsPrint();
 
+// Wipe all counters back to zero.
+void statsReset();
+
 // `stats …` serial command dispatcher.
 void parseStatsCommand(const char* cmd);

@@ -201,7 +201,7 @@ void parseReconCommand(const char* cmd);
 // dnsDecodeName is declared in dns_util.h.
 
 // Live Stats — declared in stats.h.
-void statsReset();
+// statsReset is declared in stats.h.
 
 // Hexdump / PCAP-over-Serial — declared in hexdump.h.
 
@@ -1206,12 +1206,7 @@ void parseReconCommand(const char* cmd) {
 // Tracks packets/sec, protocol breakdown, top talkers by IP,
 // and total bytes. Reset with `stats reset`.
 
-void statsReset() {
-  memset(statsTalkers, 0, sizeof(statsTalkers));
-  statsWindowStart = millis();
-  statsWindowPkts = 0;
-  statsWindowBytes = 0;
-  statsProtoTCP = 0;
+// statsReset moved to stats.cpp.
 
 
 // ══════════════════════════════════════════════════════════════

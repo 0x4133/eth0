@@ -8,6 +8,8 @@
 #include <Arduino.h>
 
 #include "config.h"
+#include "eth_frame.h"
+#include "pcap_writer.h"
 
 bool hexdumpEnabled    = false;  // live hex output of captured packets
 bool hexdumpPcapSerial = false;  // binary PCAP stream over serial

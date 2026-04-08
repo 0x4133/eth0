@@ -199,3 +199,15 @@ void parseStatsCommand(const char* cmd) {
     Serial.println("  stats reset    - reset all counters");
   }
 }
+
+void statsReset() {
+  memset(statsTalkers, 0, sizeof(statsTalkers));
+  statsWindowStart = millis();
+  statsWindowPkts = 0;
+  statsWindowBytes = 0;
+  statsProtoTCP = 0;
+  statsProtoUDP = 0;
+  statsProtoICMP = 0;
+  statsProtoARP = 0;
+  statsProtoOther = 0;
+}
