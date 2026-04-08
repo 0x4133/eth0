@@ -1,0 +1,87 @@
+/home/runner/work/eth0/eth0/eth0/attack_dhcp_starve.cpp: In function 'void dhcpStarveSendDiscover()':
+/home/runner/work/eth0/eth0/eth0/attack_dhcp_starve.cpp:48:12: warning: unused variable 'udpStart' [-Wunused-variable]
+   uint16_t udpStart = pos;
+            ^~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_dhcp_starve.cpp:59:12: warning: unused variable 'dhcpStart' [-Wunused-variable]
+   uint16_t dhcpStart = pos;
+            ^~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_dns_spoof.cpp: In function 'void dnsSpoofSendResponse(const uint8_t*, uint16_t, const uint8_t*, uint8_t, const uint8_t*)':
+/home/runner/work/eth0/eth0/eth0/attack_dns_spoof.cpp:194:12: warning: unused variable 'dnsStart' [-Wunused-variable]
+   uint16_t dnsStart = pos;
+            ^~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_tcp_rst.cpp: In function 'void parseKillCommand(const char*)':
+/home/runner/work/eth0/eth0/eth0/attack_tcp_rst.cpp:158:21: warning: format '%u' expects argument of type 'unsigned int', but argument 13 has type 'long unsigned int' [-Wformat=]
+       Serial.printf("  %u.%u.%u.%u:%u <-> %u.%u.%u.%u:%u (%us ago)\n", c.srcIP[0], c.srcIP[1],
+                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_tcp_rst.cpp:160:44:
+                     c.dstIP[3], c.dstPort, (millis() - c.lastSeen) / 1000);
+                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_nbns_poison.cpp: In function 'void poisonCheckPacket(const uint8_t*, uint16_t)':
+/home/runner/work/eth0/eth0/eth0/attack_nbns_poison.cpp:81:14: warning: unused variable 'uStart' [-Wunused-variable]
+     uint16_t uStart = pos;
+              ^~~~~~
+/home/runner/work/eth0/eth0/eth0/eth0.ino: In function 'void setup()':
+/home/runner/work/eth0/eth0/eth0/eth0.ino:296:21: warning: format '%lu' expects argument of type 'long unsigned int', but argument 4 has type 'uint32_t' {aka 'unsigned int'} [-Wformat=]
+       Serial.printf("[SD] Retry %d/4 at %lu Hz...\n", attempt, speed);
+                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~           ~~~~~
+/home/runner/work/eth0/eth0/eth0/eth0.ino: In function 'void statsReset()':
+/home/runner/work/eth0/eth0/eth0/eth0.ino:1214:20: error: expected '}' at end of input
+   statsProtoTCP = 0;
+                    ^
+/home/runner/work/eth0/eth0/eth0/eth0.ino:1209:19: note: to match this '{'
+ void statsReset() {
+                   ^
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp: In function 'void hexdumpPacket(const uint8_t*, uint16_t)':
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:17:62: error: 'ETH_TYPE' was not declared in this scope
+   uint16_t etype = (len >= ETH_HEADER_LEN) ? pktRead16(pkt + ETH_TYPE) : 0;
+                                                              ^~~~~~~~
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:17:62: note: suggested alternative: 'EFTYPE'
+   uint16_t etype = (len >= ETH_HEADER_LEN) ? pktRead16(pkt + ETH_TYPE) : 0;
+                                                              ^~~~~~~~
+                                                              EFTYPE
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:17:46: error: 'pktRead16' was not declared in this scope
+   uint16_t etype = (len >= ETH_HEADER_LEN) ? pktRead16(pkt + ETH_TYPE) : 0;
+                                              ^~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:17:46: note: suggested alternative: 'rmtRead'
+   uint16_t etype = (len >= ETH_HEADER_LEN) ? pktRead16(pkt + ETH_TYPE) : 0;
+                                              ^~~~~~~~~
+                                              rmtRead
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:18:83: error: 'packetCount' was not declared in this scope
+   Serial.printf("\n[HEX] ── Packet #%u (%u bytes) EtherType=0x%04X ──\n", packetCount, len, etype);
+                                                                                   ^~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp: In function 'void pcapSerialPacket(const uint8_t*, uint16_t)':
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:87:9: warning: 'void* memcpy(void*, const void*, size_t)' forming offset [3, 4] is out of the bounds [0, 2] of object 'len' with type 'uint16_t' {aka 'short unsigned int'} [-Warray-bounds]
+   memcpy(phdr + 8, &len, 4);   // incl_len (little-endian on ESP32)
+   ~~~~~~^~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:78:52: note: 'len' declared here
+ void pcapSerialPacket(const uint8_t* pkt, uint16_t len) {
+                                           ~~~~~~~~~^~~
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:88:9: warning: 'void* memcpy(void*, const void*, size_t)' forming offset [3, 4] is out of the bounds [0, 2] of object 'len' with type 'uint16_t' {aka 'short unsigned int'} [-Warray-bounds]
+   memcpy(phdr + 12, &len, 4);  // orig_len
+   ~~~~~~^~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:78:52: note: 'len' declared here
+ void pcapSerialPacket(const uint8_t* pkt, uint16_t len) {
+                                           ~~~~~~~~~^~~
+/home/runner/work/eth0/eth0/eth0/ids.cpp: In function 'void parseIdsCommand(const char*)':
+/home/runner/work/eth0/eth0/eth0/ids.cpp:656:21: warning: format '%u' expects argument of type 'unsigned int', but argument 13 has type 'long unsigned int' [-Wformat=]
+       Serial.printf("  %u.%u.%u.%u -> %02X:%02X:%02X:%02X:%02X:%02X (seen %us ago)\n",
+                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/ids.cpp:660:21:
+                     (millis() - arpTable[i].lastSeen) / 1000);
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/inject.cpp: In function 'void sendUDP(const uint8_t*, uint16_t, const char*, uint16_t)':
+/home/runner/work/eth0/eth0/eth0/inject.cpp:165:12: warning: unused variable 'udpStart' [-Wunused-variable]
+   uint16_t udpStart = pos;
+            ^~~~~~~~
+
+[92mUsed library[0m      [92mVersion[0m [90mPath[0m
+[93mAdafruit NeoPixel[0m 1.12.3  [90m/home/runner/Arduino/libraries/Adafruit_NeoPixel[0m
+[93mEthernet2[0m         1.0.4   [90m/home/runner/Arduino/libraries/Ethernet2[0m
+[93mSPI[0m               2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/SPI[0m
+[93mPreferences[0m       2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/Preferences[0m
+[93mSD[0m                2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/SD[0m
+[93mFS[0m                2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/FS[0m
+
+[92mUsed platform[0m [92mVersion[0m [90mPath[0m
+[93mesp32:esp32[0m   2.0.17  [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17[0m
+Error during build: exit status 1
