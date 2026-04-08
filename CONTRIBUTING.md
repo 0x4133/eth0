@@ -60,10 +60,19 @@ ESP32 core (for `SPI`, `SD`, `Preferences`, `mbedtls/aes`).
 For headless/CI builds, `arduino-cli` produces the same firmware:
 
 ```sh
+# Compile-check only (uses defaults for partition / PSRAM):
+arduino-cli compile --fqbn esp32:esp32:esp32s3 eth0/
+
+# Production flash with the partition scheme + PSRAM the
+# Waveshare board needs:
 arduino-cli compile \
-  --fqbn esp32:esp32:esp32s3:USBMode=default,CDCOnBoot=cdc,FlashSize=16M,PartitionScheme=default_16MB \
+  --fqbn esp32:esp32:esp32s3:USBMode=default,CDCOnBoot=cdc,FlashSize=16M,PartitionScheme=default,PSRAM=opi \
   eth0/
 ```
+
+Note: not every menu option from the Arduino IDE has the same name
+in the FQBN string. `PartitionScheme=default_16MB` is **not** valid
+in esp32 core 2.0.17 — use `default` or `app3M_fat9M_16MB`.
 
 ---
 

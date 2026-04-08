@@ -100,6 +100,11 @@ are what CI tests against:
 | Upload Speed | 921600 |
 | USB Mode | Hardware CDC and JTAG |
 
+The CI workflow uses the bare FQBN `esp32:esp32:esp32s3` (defaults
+for partition scheme and PSRAM) because it only verifies the sketch
+compiles. For actual deployment, set the menu options above in the
+Arduino IDE — these are what the Waveshare board's hardware needs.
+
 Serial monitor baud rate is **460800**.
 
 ---
