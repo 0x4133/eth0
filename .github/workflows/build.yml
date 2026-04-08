@@ -74,12 +74,29 @@ jobs:
 
       - name: Compile eth0 sketch
         run: |
+          set -o pipefail
+          # Capture full output, then re-emit failures as ::error::
+          # annotations so the diagnostics appear inline on the run
+          # without needing to download logs.
           arduino-cli compile \
             --fqbn "${FQBN}" \
             --warnings more \
             --export-binaries \
             --output-dir build \
-            eth0/
+            eth0/ 2>&1 | tee build.log
+          rc=${PIPESTATUS[0]}
+          if [ $rc -ne 0 ]; then
+            echo "── arduino-cli exited with code $rc ──"
+            # Tail of the build log, surfaced as an annotation block
+            echo "::group::compile errors (tail of build.log)"
+            tail -120 build.log
+            echo "::endgroup::"
+            # Re-emit each error/warning line as a workflow annotation
+            grep -E ": (error|fatal error):" build.log | while IFS= read -r line; do
+              echo "::error::${line}"
+            done
+            exit $rc
+          fi
 
       - name: Report firmware size
         run: |
