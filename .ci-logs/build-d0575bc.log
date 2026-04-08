@@ -1,0 +1,24 @@
+/home/runner/work/eth0/eth0/eth0/attack_dns_spoof.cpp: In function 'void dnsSpoofSendResponse(const uint8_t*, uint16_t, const uint8_t*, uint8_t, const uint8_t*)':
+/home/runner/work/eth0/eth0/eth0/attack_dns_spoof.cpp:229:64: error: 'udpStart' was not declared in this scope
+   uint16_t cksum = udpChecksum(queryDstIP, querySrcIP, txBuf + udpStart, udpRespLen);
+                                                                ^~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_dns_spoof.cpp:229:64: note: suggested alternative: 'btStart'
+   uint16_t cksum = udpChecksum(queryDstIP, querySrcIP, txBuf + udpStart, udpRespLen);
+                                                                ^~~~~~~~
+                                                                btStart
+/home/runner/work/eth0/eth0/eth0/attack_dns_spoof.cpp: At global scope:
+/home/runner/work/eth0/eth0/eth0/attack_dns_spoof.cpp:119:17: warning: 'uint16_t udpChecksum(const uint8_t*, const uint8_t*, const uint8_t*, uint16_t)' defined but not used [-Wunused-function]
+ static uint16_t udpChecksum(const uint8_t* srcIP, const uint8_t* dstIP, const uint8_t* udpPkt,
+                 ^~~~~~~~~~~
+
+[92mUsed library[0m      [92mVersion[0m [90mPath[0m
+[93mAdafruit NeoPixel[0m 1.12.3  [90m/home/runner/Arduino/libraries/Adafruit_NeoPixel[0m
+[93mEthernet2[0m         1.0.4   [90m/home/runner/Arduino/libraries/Ethernet2[0m
+[93mSPI[0m               2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/SPI[0m
+[93mPreferences[0m       2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/Preferences[0m
+[93mSD[0m                2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/SD[0m
+[93mFS[0m                2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/FS[0m
+
+[92mUsed platform[0m [92mVersion[0m [90mPath[0m
+[93mesp32:esp32[0m   2.0.17  [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17[0m
+Error during build: exit status 1
