@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-08
+
 ### Added
+- `release` GitHub Actions workflow that, on a `v*.*.*` tag push,
+  builds the firmware via `arduino-cli`, computes SHA-256 sums,
+  extracts the matching CHANGELOG section, and publishes a
+  GitHub Release with `.bin` / `.elf` / `.map` / `.sha256`
+  attached.
 - `docs/ARCHITECTURE.md` — module map, runtime control flow, state
   ownership rules, and the rationale for the per-subsystem extern
   pattern.
@@ -80,5 +87,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Initial public snapshot. Full feature set documented in `README.md`
 and `docs/FEATURES.md`.
 
-[Unreleased]: https://github.com/0x4133/eth0/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/0x4133/eth0/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/0x4133/eth0/releases/tag/v0.2.0
 [0.1.0]: https://github.com/0x4133/eth0/releases/tag/v0.1.0
