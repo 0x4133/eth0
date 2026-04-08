@@ -18,6 +18,45 @@
 #include "pcap_writer.h"
 #include "state.h"
 
+// ── HTTP probe sent to ports that wait for the client to speak first ──
+static const char httpProbe[] =
+    "GET / HTTP/1.0\r\nHost: target\r\nUser-Agent: eth0-scanner\r\n\r\n";
+
+// ── Determine if a port needs a client probe to elicit a banner ──
+static bool portNeedsProbe(uint16_t port) {
+  // These protocols wait for the client to speak first
+  return (port == 80 || port == 443 || port == 8080 || port == 8443 || port == 8000 ||
+          port == 3000 || port == 9090);
+}
+
+// ── Extract readable banner from raw TCP payload ──
+// Copies printable chars, stops at first NUL or after maxLen
+static void extractBanner(const uint8_t* data, uint16_t dataLen, char* out, uint16_t maxLen) {
+  uint16_t j = 0;
+  for (uint16_t i = 0; i < dataLen && j < maxLen - 1; i++) {
+    uint8_t c = data[i];
+    if (c == '\r')
+      continue;
+    if (c == '\n') {
+      // Stop at second newline (end of first line for most banners)
+      if (j > 0 && out[j - 1] == '|')
+        break;
+      out[j++] = '|';  // visual separator for multi-line
+      continue;
+    }
+    if (c >= 0x20 && c < 0x7F) {
+      out[j++] = (char)c;
+    } else if (c == '\t') {
+      out[j++] = ' ';
+    }
+    // skip non-printable
+  }
+  // Trim trailing separators
+  while (j > 0 && (out[j - 1] == '|' || out[j - 1] == ' '))
+    j--;
+  out[j] = '\0';
+}
+
 void reconServiceScan(const uint8_t* targetIP, const uint16_t* ports, uint8_t numPorts) {
   Serial.printf("\n[SCAN] Service scan: %u.%u.%u.%u (%u ports)\n", targetIP[0], targetIP[1],
                 targetIP[2], targetIP[3], numPorts);

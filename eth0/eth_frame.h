@@ -10,6 +10,14 @@
 
 #include <stdint.h>
 
+// ESP-IDF defines `ETH_HEADER_LEN` as `(14)` in esp_eth_com.h. Our
+// value is the same numeric, but the differing parenthesization
+// triggers a redefinition warning every time both headers are seen
+// in the same TU. Override explicitly so the warning goes away.
+#ifdef ETH_HEADER_LEN
+#undef ETH_HEADER_LEN
+#endif
+
 // ── Ethernet frame offsets ──
 #define ETH_DST_MAC    0
 #define ETH_SRC_MAC    6

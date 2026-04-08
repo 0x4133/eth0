@@ -13,6 +13,7 @@
 #include "arp_table.h"
 #include "config.h"
 #include "eth_frame.h"
+#include "ids.h"
 #include "pcap_writer.h"
 #include "spi_bus.h"
 #include "state.h"
@@ -350,4 +351,155 @@ uint16_t buildTcpFinAck(uint8_t* buf, const uint8_t* dstMAC, const uint8_t* srcI
   uint16_t cksum = tcpChecksum(srcIP, dstIP, buf + tcpStart, tcpLen);
   pktWrite16(buf + tcpStart + 16, cksum);
   return pos;
+}
+
+// ── Build a TCP ACK packet (completing the handshake) ──
+uint16_t buildTcpAck(uint8_t* buf, const uint8_t* dstMAC, const uint8_t* srcIP,
+                     const uint8_t* dstIP, uint16_t srcPort, uint16_t dstPort, uint32_t seqNum,
+                     uint32_t ackNum) {
+  uint16_t pos = 0;
+  pos = buildEthHeader(buf, dstMAC, ETHERTYPE_IPV4);
+
+  uint16_t tcpLen = 20;  // no options
+  pos += buildIPv4Header(buf + pos, srcIP, dstIP, IP_PROTO_TCP, tcpLen);
+
+  uint16_t tcpStart = pos;
+  pktWrite16(buf + pos, srcPort);
+  pos += 2;
+  pktWrite16(buf + pos, dstPort);
+  pos += 2;
+  pktWrite32(buf + pos, seqNum);
+  pos += 4;
+  pktWrite32(buf + pos, ackNum);
+  pos += 4;
+  buf[pos++] = 0x50;  // Data offset: 5 (20 bytes)
+  buf[pos++] = 0x10;  // Flags: ACK
+  pktWrite16(buf + pos, 65535);
+  pos += 2;  // Window
+  pktWrite16(buf + pos, 0);
+  pos += 2;  // Checksum placeholder
+  pktWrite16(buf + pos, 0);
+  pos += 2;  // Urgent
+
+  uint16_t cksum = tcpChecksum(srcIP, dstIP, buf + tcpStart, tcpLen);
+  pktWrite16(buf + tcpStart + 16, cksum);
+  return pos;
+}
+
+// ── Build a TCP PSH+ACK with payload (for sending HTTP probe, etc.) ──
+uint16_t buildTcpDataPush(uint8_t* buf, const uint8_t* dstMAC, const uint8_t* srcIP,
+                          const uint8_t* dstIP, uint16_t srcPort, uint16_t dstPort, uint32_t seqNum,
+                          uint32_t ackNum, const uint8_t* payload, uint16_t payloadLen) {
+  uint16_t pos = 0;
+  pos = buildEthHeader(buf, dstMAC, ETHERTYPE_IPV4);
+
+  uint16_t tcpLen = 20 + payloadLen;
+  pos += buildIPv4Header(buf + pos, srcIP, dstIP, IP_PROTO_TCP, tcpLen);
+
+  uint16_t tcpStart = pos;
+  pktWrite16(buf + pos, srcPort);
+  pos += 2;
+  pktWrite16(buf + pos, dstPort);
+  pos += 2;
+  pktWrite32(buf + pos, seqNum);
+  pos += 4;
+  pktWrite32(buf + pos, ackNum);
+  pos += 4;
+  buf[pos++] = 0x50;  // Data offset: 5
+  buf[pos++] = 0x18;  // Flags: PSH + ACK
+  pktWrite16(buf + pos, 65535);
+  pos += 2;
+  pktWrite16(buf + pos, 0);
+  pos += 2;  // Checksum placeholder
+  pktWrite16(buf + pos, 0);
+  pos += 2;
+
+  // Copy payload
+  memcpy(buf + pos, payload, payloadLen);
+  pos += payloadLen;
+
+  uint16_t cksum = tcpChecksum(srcIP, dstIP, buf + tcpStart, tcpLen);
+  pktWrite16(buf + tcpStart + 16, cksum);
+  return pos;
+}
+
+// ── Build a TCP RST to tear down connection ──
+uint16_t buildTcpRst(uint8_t* buf, const uint8_t* dstMAC, const uint8_t* srcIP,
+                     const uint8_t* dstIP, uint16_t srcPort, uint16_t dstPort, uint32_t seqNum) {
+  uint16_t pos = 0;
+  pos = buildEthHeader(buf, dstMAC, ETHERTYPE_IPV4);
+
+  uint16_t tcpLen = 20;
+  pos += buildIPv4Header(buf + pos, srcIP, dstIP, IP_PROTO_TCP, tcpLen);
+
+  uint16_t tcpStart = pos;
+  pktWrite16(buf + pos, srcPort);
+  pos += 2;
+  pktWrite16(buf + pos, dstPort);
+  pos += 2;
+  pktWrite32(buf + pos, seqNum);
+  pos += 4;
+  pktWrite32(buf + pos, 0);
+  pos += 4;  // ack
+  buf[pos++] = 0x50;
+  buf[pos++] = 0x04;  // Flags: RST
+  pktWrite16(buf + pos, 0);
+  pos += 2;
+  pktWrite16(buf + pos, 0);
+  pos += 2;
+  pktWrite16(buf + pos, 0);
+  pos += 2;
+
+  uint16_t cksum = tcpChecksum(srcIP, dstIP, buf + tcpStart, tcpLen);
+  pktWrite16(buf + tcpStart + 16, cksum);
+  return pos;
+}
+
+// ── Resolve target IP to MAC via ARP table or active ARP request ──
+bool resolveMacForIP(const uint8_t* targetIP, uint8_t* outMAC) {
+  // Check if on our subnet
+  bool sameSubnet = true;
+  for (int i = 0; i < 4; i++) {
+    if ((targetIP[i] & ourSubnet[i]) != (ourIP[i] & ourSubnet[i])) {
+      sameSubnet = false;
+      break;
+    }
+  }
+
+  const uint8_t* lookupIP = sameSubnet ? targetIP : ourGW;
+
+  // Check ARP table first
+  for (int i = 0; i < ARP_TABLE_SIZE; i++) {
+    if (arpTable[i].active && memcmp(arpTable[i].ip, lookupIP, 4) == 0) {
+      memcpy(outMAC, arpTable[i].mac, 6);
+      return true;
+    }
+  }
+
+  // ARP resolve
+  Serial.printf("  [SCAN] Resolving MAC for %u.%u.%u.%u...\n", lookupIP[0], lookupIP[1],
+                lookupIP[2], lookupIP[3]);
+
+  for (int attempt = 0; attempt < 3; attempt++) {
+    sendArpRequest(lookupIP);
+    uint32_t waitEnd = millis() + 500;
+    while (millis() < waitEnd) {
+      uint16_t rxSize = w5500.getRXReceivedSize(RAW_SOCKET);
+      if (rxSize == 0) {
+        delay(5);
+        continue;
+      }
+      uint16_t len = recvfrom(RAW_SOCKET, packetBuf, MAX_FRAME_SIZE, NULL, NULL);
+      if (len > ETH_HEADER_LEN + 28 && pktRead16(packetBuf + ETH_TYPE) == ETHERTYPE_ARP) {
+        const uint8_t* arp = packetBuf + ETH_HEADER_LEN;
+        if (pktRead16(arp + 6) == 2 && memcmp(arp + 14, lookupIP, 4) == 0) {
+          memcpy(outMAC, arp + 8, 6);
+          if (idsEnabled)
+            idsCheckArp(packetBuf, len);
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }

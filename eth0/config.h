@@ -15,6 +15,15 @@
 
 #pragma once
 
+// LWIP and ESP-IDF define `ARP_TABLE_SIZE` (= 10) for the standard
+// IP stack's internal ARP cache. We're in MACRAW mode and never
+// touch LWIP's stack, so override it with our own (much larger)
+// value for the IDS-tracked ARP cache. The redefinition warning is
+// real but harmless; the undef makes the override explicit.
+#ifdef ARP_TABLE_SIZE
+#undef ARP_TABLE_SIZE
+#endif
+
 // ── Capture ──
 #define RAW_SOCKET       0                            // W5500 socket number for MACRAW (must be 0)
 #define MAX_FRAME_SIZE   1518                         // Max Ethernet frame

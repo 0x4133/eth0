@@ -60,3 +60,24 @@ uint16_t buildTcpSynAck(uint8_t* buf, const uint8_t* dstMAC, const uint8_t* srcI
 uint16_t buildTcpFinAck(uint8_t* buf, const uint8_t* dstMAC, const uint8_t* srcIP,
                         const uint8_t* dstIP, uint16_t srcPort, uint16_t dstPort, uint32_t seqNum,
                         uint32_t ackNum);
+
+// Plain ACK (completes the three-way handshake).
+uint16_t buildTcpAck(uint8_t* buf, const uint8_t* dstMAC, const uint8_t* srcIP,
+                     const uint8_t* dstIP, uint16_t srcPort, uint16_t dstPort, uint32_t seqNum,
+                     uint32_t ackNum);
+
+// PSH+ACK with arbitrary payload (used by service scanner to send
+// HTTP probes after the handshake completes).
+uint16_t buildTcpDataPush(uint8_t* buf, const uint8_t* dstMAC, const uint8_t* srcIP,
+                          const uint8_t* dstIP, uint16_t srcPort, uint16_t dstPort, uint32_t seqNum,
+                          uint32_t ackNum, const uint8_t* payload, uint16_t payloadLen);
+
+// RST to tear down a half-open or stale connection.
+uint16_t buildTcpRst(uint8_t* buf, const uint8_t* dstMAC, const uint8_t* srcIP,
+                     const uint8_t* dstIP, uint16_t srcPort, uint16_t dstPort, uint32_t seqNum);
+
+// Resolve `targetIP` to a MAC address. Looks in the IDS ARP table
+// first; if the target is off-subnet, looks up the gateway MAC
+// instead. Falls back to sending an ARP request and waiting up to
+// ~1.5 s for a reply. Returns false if no MAC could be obtained.
+bool resolveMacForIP(const uint8_t* targetIP, uint8_t* outMAC);

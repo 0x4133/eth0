@@ -13,6 +13,7 @@
 
 #include "config.h"
 #include "eth_frame.h"
+#include "filter.h"
 #include "ids.h"
 #include "inject.h"
 #include "pcap_writer.h"
@@ -31,23 +32,8 @@ uint8_t     netbiosCount = 0;
 
 // ── Decode a NetBIOS first-level encoded name ──
 // NetBIOS names are encoded as pairs of characters: each byte B becomes
-// two chars: ('A' + (B >> 4)), ('A' + (B & 0x0F))
-// The 16th byte is the suffix/type (0x00=workstation, 0x20=file server, etc.)
-static void nbnsDecodeName(const uint8_t* enc, char* out, uint8_t* suffix) {
-  for (int i = 0; i < 15; i++) {
-    char c = ((enc[i * 2] - 'A') << 4) | (enc[i * 2 + 1] - 'A');
-    out[i] = (c >= 0x20 && c < 0x7F) ? c : ' ';
-  }
-  out[15] = '\0';
-  // Trim trailing spaces
-  for (int i = 14; i >= 0 && out[i] == ' '; i--)
-    out[i] = '\0';
-
-  // Suffix byte is in position 15 (the 16th character pair)
-  if (suffix) {
-    *suffix = ((enc[30] - 'A') << 4) | (enc[31] - 'A');
-  }
-}
+// nbnsDecodeName was defined here in the original code but never
+// called — netbiosParseResponse uses an inlined decoder. Removed.
 
 // ── Encode a name in NetBIOS first-level encoding ──
 // Input: 16-byte padded name (15 chars + suffix byte)

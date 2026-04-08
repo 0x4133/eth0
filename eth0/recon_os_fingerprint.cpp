@@ -9,6 +9,7 @@
 
 #include "config.h"
 #include "eth_frame.h"
+#include "state.h"
 
 OsFingerprint fpTable[FP_TABLE_SIZE];
 
