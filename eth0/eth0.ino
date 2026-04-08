@@ -55,8 +55,10 @@
 #include <utility/socket.h>
 #include <utility/w5500.h>
 
+#include "eth_frame.h"
 #include "ip_util.h"
 #include "pins.h"
+#include "state.h"
 
 // ── Config ──
 #define RAW_SOCKET 0                            // W5500 socket number for MACRAW (must be 0)
@@ -141,7 +143,8 @@ static IrcChannel ircChannels[IRC_MAX_CHANNELS];
 static bool ircServerActive = false;
 
 // MAC address for the W5500
-byte mac[] = {0x02, 0xCA, 0xFE, 0xBA, 0xBE, 0x01};
+// Defined here, declared extern in state.h so other modules can read/write it.
+uint8_t mac[6] = {0x02, 0xCA, 0xFE, 0xBA, 0xBE, 0x01};
 
 // Our IP (populated by DHCP, fallback to static if DHCP fails)
 uint8_t ourIP[4] = {0, 0, 0, 0};
@@ -154,21 +157,8 @@ static const uint8_t fallbackIP[4] = {192, 168, 50, 200};
 static const uint8_t fallbackGW[4] = {192, 168, 50, 1};
 static const uint8_t fallbackSubnet[4] = {255, 255, 255, 0};
 
-// ── Ethernet frame offsets ──
-#define ETH_DST_MAC 0
-#define ETH_SRC_MAC 6
-#define ETH_TYPE 12
-#define ETH_HEADER_LEN 14
-
-// EtherTypes
-#define ETHERTYPE_IPV4 0x0800
-#define ETHERTYPE_ARP 0x0806
-#define ETHERTYPE_IPV6 0x86DD
-
-// IP protocol numbers
-#define IP_PROTO_ICMP 1
-#define IP_PROTO_TCP 6
-#define IP_PROTO_UDP 17
+// Ethernet frame offsets, EtherTypes, IP protocol numbers, and wire-format
+// byte-order helpers live in eth_frame.h.
 
 // ── IDS / Detection Config ──
 #define ARP_TABLE_SIZE 64         // Max tracked IP→MAC bindings
@@ -581,10 +571,7 @@ void idsPrintStats();
 void switchToEthSPI();
 void switchToSdSPI();
 uint16_t sendRawFrame(const uint8_t* frame, uint16_t len);
-uint16_t buildEthHeader(uint8_t* buf, const uint8_t* dstMAC, uint16_t ethertype);
-uint16_t buildIPv4Header(uint8_t* buf, const uint8_t* srcIP, const uint8_t* dstIP, uint8_t protocol,
-                         uint16_t payloadLen);
-uint16_t ipChecksum(const uint8_t* data, uint16_t len);
+// buildEthHeader, buildIPv4Header, ipChecksum, tcpChecksum are declared in eth_frame.h.
 void sendArpRequest(const uint8_t* targetIP);
 void sendPing(const uint8_t* targetIP);
 void sendUDP(const uint8_t* targetIP, uint16_t dstPort, const char* payload, uint16_t payloadLen);
@@ -1120,22 +1107,6 @@ void switchToSdSPI() {
 //  Packet Filter Engine
 // ══════════════════════════════════════════
 
-static inline uint16_t pktRead16(const uint8_t* p) {
-  return ((uint16_t)p[0] << 8) | p[1];
-}
-
-static inline void pktWrite16(uint8_t* p, uint16_t val) {
-  p[0] = (val >> 8) & 0xFF;
-  p[1] = val & 0xFF;
-}
-
-static inline void pktWrite32(uint8_t* p, uint32_t val) {
-  p[0] = (val >> 24) & 0xFF;
-  p[1] = (val >> 16) & 0xFF;
-  p[2] = (val >> 8) & 0xFF;
-  p[3] = val & 0xFF;
-}
-
 bool packetMatchesFilter(const uint8_t* pkt, uint16_t len) {
   if (activeFilter.type == FILTER_NONE)
     return true;
@@ -1230,53 +1201,7 @@ uint16_t sendRawFrame(const uint8_t* frame, uint16_t len) {
   return len;
 }
 
-// Build Ethernet header, returns offset after header (14)
-uint16_t buildEthHeader(uint8_t* buf, const uint8_t* dstMAC, uint16_t ethertype) {
-  memcpy(buf + ETH_DST_MAC, dstMAC, 6);
-  memcpy(buf + ETH_SRC_MAC, mac, 6);
-  pktWrite16(buf + ETH_TYPE, ethertype);
-  return ETH_HEADER_LEN;
-}
-
-// IP header checksum (RFC 1071)
-uint16_t ipChecksum(const uint8_t* data, uint16_t len) {
-  uint32_t sum = 0;
-  for (uint16_t i = 0; i < len - 1; i += 2) {
-    sum += ((uint16_t)data[i] << 8) | data[i + 1];
-  }
-  if (len & 1) {
-    sum += (uint16_t)data[len - 1] << 8;
-  }
-  while (sum >> 16) {
-    sum = (sum & 0xFFFF) + (sum >> 16);
-  }
-  return ~sum & 0xFFFF;
-}
-
-// Build IPv4 header at buf, returns total header length (20)
-// Caller must set buf starting at the IP header position
-uint16_t buildIPv4Header(uint8_t* buf, const uint8_t* srcIP, const uint8_t* dstIP, uint8_t protocol,
-                         uint16_t payloadLen) {
-  static uint16_t ipID = 1;
-
-  memset(buf, 0, 20);
-  buf[0] = 0x45;                         // IPv4, IHL=5 (20 bytes)
-  buf[1] = 0x00;                         // DSCP/ECN
-  pktWrite16(buf + 2, 20 + payloadLen);  // Total length
-  pktWrite16(buf + 4, ipID++);           // Identification
-  pktWrite16(buf + 6, 0x4000);           // Flags: Don't Fragment
-  buf[8] = 64;                           // TTL
-  buf[9] = protocol;                     // Protocol
-  // Checksum at offset 10-11 (zero for now)
-  memcpy(buf + 12, srcIP, 4);  // Source IP
-  memcpy(buf + 16, dstIP, 4);  // Destination IP
-
-  // Calculate and set header checksum
-  uint16_t cksum = ipChecksum(buf, 20);
-  pktWrite16(buf + 10, cksum);
-
-  return 20;
-}
+// buildEthHeader, ipChecksum, and buildIPv4Header moved to eth_frame.cpp.
 
 // ── Send ARP "who-has" request ──
 void sendArpRequest(const uint8_t* targetIP) {
@@ -2621,30 +2546,7 @@ static const uint16_t commonPorts[] = {21,   22,   23,   25,   53,   80,   110, 
                                        1723, 3306, 3389, 5432, 5900, 8080, 8443};
 static const uint8_t numCommonPorts = sizeof(commonPorts) / sizeof(commonPorts[0]);
 
-// ── TCP pseudo-header checksum helper ──
-static uint16_t tcpChecksum(const uint8_t* srcIP, const uint8_t* dstIP, const uint8_t* tcpSeg,
-                            uint16_t tcpLen) {
-  uint32_t sum = 0;
-
-  // Pseudo-header: srcIP + dstIP + zero + proto(6) + TCP length
-  for (int i = 0; i < 4; i += 2)
-    sum += ((uint16_t)srcIP[i] << 8) | srcIP[i + 1];
-  for (int i = 0; i < 4; i += 2)
-    sum += ((uint16_t)dstIP[i] << 8) | dstIP[i + 1];
-  sum += (uint16_t)IP_PROTO_TCP;
-  sum += tcpLen;
-
-  // TCP segment
-  for (uint16_t i = 0; i < tcpLen - 1; i += 2)
-    sum += ((uint16_t)tcpSeg[i] << 8) | tcpSeg[i + 1];
-  if (tcpLen & 1)
-    sum += (uint16_t)tcpSeg[tcpLen - 1] << 8;
-
-  while (sum >> 16)
-    sum = (sum & 0xFFFF) + (sum >> 16);
-
-  return ~sum & 0xFFFF;
-}
+// tcpChecksum is declared in eth_frame.h and defined in eth_frame.cpp.
 
 // ── Build a TCP SYN packet, returns total frame length ──
 uint16_t buildTcpSyn(uint8_t* buf, const uint8_t* dstMAC, const uint8_t* srcIP,
@@ -3672,10 +3574,7 @@ static void extractBanner(const uint8_t* data, uint16_t dataLen, char* out, uint
   out[j] = '\0';
 }
 
-// ── Read a uint32_t from packet buffer (network byte order) ──
-static uint32_t pktRead32(const uint8_t* p) {
-  return ((uint32_t)p[0] << 24) | ((uint32_t)p[1] << 16) | ((uint32_t)p[2] << 8) | p[3];
-}
+// pktRead32 lives in eth_frame.h as a static inline helper.
 
 // ══════════════════════════════════════════
 //  Full TCP service scan per port:
