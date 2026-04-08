@@ -9,9 +9,10 @@ name: build
 
 on:
   push:
-    branches: [main]
+    # Run on every branch push, not just main, so feature branches
+    # get verified before opening a PR.
+    branches-ignore: []
   pull_request:
-    branches: [main]
   workflow_dispatch:
 
 # A second push to the same branch should cancel the earlier run.
