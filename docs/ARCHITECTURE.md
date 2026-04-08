@@ -12,11 +12,11 @@ The runtime model is single-threaded:
 ```
                         ┌──────────────────────┐
                         │       setup()        │
-                        │ ────────────────────│
-                        │ NeoPixel init       │
-                        │ SPI / SD / W5500    │
-                        │ DHCP                │
-                        │ MACRAW socket open  │
+                        │  ────────────────────│
+                        │  NeoPixel init       │
+                        │  SPI / SD / W5500    │
+                        │  DHCP                │
+                        │  MACRAW socket open  │
                         └──────────┬───────────┘
                                    │
                                    ▼
