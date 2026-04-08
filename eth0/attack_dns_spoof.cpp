@@ -180,6 +180,7 @@ void dnsSpoofSendResponse(const uint8_t* pkt, uint16_t len, const uint8_t* ipHdr
   pos += buildIPv4Header(txBuf + pos, queryDstIP, querySrcIP, IP_PROTO_UDP, udpRespLen);
 
   // UDP header
+  uint16_t udpStart = pos;
   pktWrite16(txBuf + pos, 53);
   pos += 2;  // Source port (DNS)
   pktWrite16(txBuf + pos, clientPort);
