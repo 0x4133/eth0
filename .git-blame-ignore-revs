@@ -1,0 +1,14 @@
+# Git revisions that should be ignored by `git blame`.
+#
+# These are purely mechanical reformats — running clang-format, mass
+# renames, whitespace normalization, etc. — that would otherwise
+# attribute every touched line to the formatter's commit instead of
+# the real author.
+#
+# Enable locally with:
+#     git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# GitHub's Blame view honors this file automatically.
+
+# Phase 3: initial clang-format pass over eth0/eth0.ino.
+6c1ea39b1f20c0b8bc5e07eff908ed2995d71131

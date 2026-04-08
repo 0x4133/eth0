@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `arduino-cli` on every push and pull request, against pinned ESP32
   core and library versions matching `CONTRIBUTING.md`. Built firmware
   is uploaded as a CI artifact with a 14-day retention.
+- `.git-blame-ignore-revs` file recording mechanical reformat commits
+  so `git blame` keeps attributing pre-format lines to their true
+  authors. GitHub's Blame view honors the file automatically; local
+  `git blame` requires `git config blame.ignoreRevsFile
+  .git-blame-ignore-revs`.
 - ARP sweep now accepts arbitrary CIDRs in the `/16`–`/30` range instead
   of being hard-coded to `/24`.
 

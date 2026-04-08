@@ -81,6 +81,19 @@ with the embedded-firmware deviations documented in
 clang-format -i eth0/*.ino eth0/*.h eth0/*.cpp
 ```
 
+### Ignoring bulk reformats in `git blame`
+
+Mechanical reformats (the initial clang-format pass, future mass
+renames) are recorded in `.git-blame-ignore-revs` so their SHAs do
+not pollute `git blame` output. Enable the ignore file locally:
+
+```sh
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
+GitHub's Blame view honors the file automatically; this command is
+only needed for local `git blame`.
+
 ### Before you commit
 
 - [ ] `clang-format` passes (no diff produced).
