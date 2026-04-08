@@ -55,19 +55,8 @@
 #include <utility/socket.h>
 #include <utility/w5500.h>
 
-// ── W5500 Ethernet pins (SPI2 / HSPI) ──
-#define ETH_MISO 12
-#define ETH_MOSI 11
-#define ETH_SCK 13
-#define ETH_CS 14
-#define ETH_RST 9
-#define ETH_INT 10
-
-// ── SD Card pins (SPI3 / VSPI) ──
-#define SD_MISO 5
-#define SD_MOSI 6
-#define SD_SCK 7
-#define SD_CS 4
+#include "ip_util.h"
+#include "pins.h"
 
 // ── Config ──
 #define RAW_SOCKET 0                            // W5500 socket number for MACRAW (must be 0)
@@ -182,7 +171,6 @@ static const uint8_t fallbackSubnet[4] = {255, 255, 255, 0};
 #define IP_PROTO_UDP 17
 
 // ── IDS / Detection Config ──
-#define NEOPIXEL_PIN 21           // Onboard NeoPixel (Waveshare ESP32-S3-ETH)
 #define ARP_TABLE_SIZE 64         // Max tracked IP→MAC bindings
 #define DHCP_SERVER_MAX 4         // Max known-good DHCP servers
 #define SCAN_TRACK_SIZE 16        // Max tracked source IPs for port scan detection
@@ -549,8 +537,6 @@ bool openNewCaptureFile();
 void commitCaptureFile();
 void writePcapGlobalHeader();
 void writePcapPacket(const uint8_t* data, uint16_t len);
-void printMAC(const uint8_t* addr);
-void printIP(const uint8_t* addr);
 // IRC Server
 void parseIrcCommand(const char* cmd);
 void ircStart();
@@ -576,8 +562,6 @@ void printMenu();
 void parseFilterCommand(const char* cmd);
 void parseSendCommand(const char* cmd);
 void parseIdsCommand(const char* cmd);
-bool parseMAC(const char* str, uint8_t* out);
-bool parseIP(const char* str, uint8_t* out);
 void printCurrentFilter();
 
 // IDS / Detection
@@ -1851,35 +1835,6 @@ void printCurrentFilter() {
 //  Parsers
 // ══════════════════════════════════════════
 
-bool parseMAC(const char* str, uint8_t* out) {
-  unsigned int vals[6];
-  if (sscanf(str, "%x:%x:%x:%x:%x:%x", &vals[0], &vals[1], &vals[2], &vals[3], &vals[4],
-             &vals[5]) == 6 ||
-      sscanf(str, "%x-%x-%x-%x-%x-%x", &vals[0], &vals[1], &vals[2], &vals[3], &vals[4],
-             &vals[5]) == 6) {
-    for (int i = 0; i < 6; i++) {
-      if (vals[i] > 255)
-        return false;
-      out[i] = (uint8_t)vals[i];
-    }
-    return true;
-  }
-  return false;
-}
-
-bool parseIP(const char* str, uint8_t* out) {
-  unsigned int vals[4];
-  if (sscanf(str, "%u.%u.%u.%u", &vals[0], &vals[1], &vals[2], &vals[3]) == 4) {
-    for (int i = 0; i < 4; i++) {
-      if (vals[i] > 255)
-        return false;
-      out[i] = (uint8_t)vals[i];
-    }
-    return true;
-  }
-  return false;
-}
-
 // ══════════════════════════════════════════
 //  Hardware & File I/O
 // ══════════════════════════════════════════
@@ -1958,20 +1913,6 @@ void writePcapPacket(const uint8_t* data, uint16_t len) {
 
   captureFile.write((const uint8_t*)&phdr, sizeof(phdr));
   captureFile.write(data, len);
-}
-
-void printMAC(const uint8_t* addr) {
-  for (int i = 0; i < 6; i++) {
-    if (i > 0)
-      Serial.print(":");
-    if (addr[i] < 0x10)
-      Serial.print("0");
-    Serial.print(addr[i], HEX);
-  }
-}
-
-void printIP(const uint8_t* addr) {
-  Serial.printf("%u.%u.%u.%u", addr[0], addr[1], addr[2], addr[3]);
 }
 
 // ══════════════════════════════════════════════════════════════
