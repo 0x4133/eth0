@@ -67,6 +67,7 @@
 #include "pins.h"
 #include "recon_arp_sweep.h"
 #include "recon_port_scan.h"
+#include "recon_vlan_discover.h"
 #include "spi_bus.h"
 #include "state.h"
 
@@ -362,10 +363,8 @@ void parseSendCommand(const char* cmd);
 void parseReconCommand(const char* cmd);
 // reconArpSweep is declared in recon_arp_sweep.h.
 // reconSynProbe is declared in recon_port_scan.h.
-void reconVlanDiscover();
+// reconVlanDiscover and buildVlanFrame are declared in recon_vlan_discover.h.
 // buildTcpSyn is declared in inject.h.
-uint16_t buildVlanFrame(uint8_t* buf, const uint8_t* dstMAC, uint16_t vlanID,
-                        uint16_t innerEthertype);
 
 // Service scanner (TCP handshake + banner grab)
 void reconServiceScan(const uint8_t* targetIP, const uint16_t* ports, uint8_t numPorts);
@@ -1189,164 +1188,6 @@ static const uint8_t numCommonPorts = sizeof(commonPorts) / sizeof(commonPorts[0
 // ── Build a TCP SYN packet, returns total frame length ──
 // buildTcpSyn / buildTcpSynAck / buildTcpFinAck live in inject.cpp.
 
-// ── Build an 802.1Q VLAN-tagged frame ──
-// Inserts a 4-byte VLAN tag after source MAC.
-// Returns total frame length.
-uint16_t buildVlanFrame(uint8_t* buf, const uint8_t* dstMAC, uint16_t vlanID,
-                        uint16_t innerEthertype) {
-  uint16_t pos = 0;
-
-  // Dst MAC
-  memcpy(buf + pos, dstMAC, 6);
-  pos += 6;
-  // Src MAC
-  memcpy(buf + pos, mac, 6);
-  pos += 6;
-  // 802.1Q TPID
-  pktWrite16(buf + pos, 0x8100);
-  pos += 2;
-  // TCI: priority(3) + DEI(1) + VLAN ID(12)
-  pktWrite16(buf + pos, vlanID & 0x0FFF);
-  pos += 2;
-  // Inner EtherType
-  pktWrite16(buf + pos, innerEthertype);
-  pos += 2;
-
-  return pos;
-}
-
-// ══════════════════════════════════════════
-//  1. ARP Sweep — scan subnet
-// ══════════════════════════════════════════
-// Sends ARP who-has for each IP in range, then listens for replies.
-// Discovered hosts are printed and added to the IDS ARP table.
-
-
-// ══════════════════════════════════════════
-//  2. TCP SYN Port Probe
-// ══════════════════════════════════════════
-// Sends TCP SYN to each port, listens for SYN-ACK (open) or RST (closed).
-// Uses broadcast MAC since we may not know the target's MAC — the
-// gateway/switch will route it. If the target was found via ARP sweep,
-// we use its MAC from the ARP table.
-
-
-// ══════════════════════════════════════════
-//  3. VLAN Discovery via 802.1Q
-// ══════════════════════════════════════════
-// Sends tagged ARP requests on a range of VLAN IDs.
-// If a response comes back, that VLAN is active on the trunk.
-
-void reconVlanDiscover() {
-  Serial.println("[RECON] 802.1Q VLAN discovery (VLANs 1-100)...");
-  Serial.println("  Sending tagged ARP probes on each VLAN.");
-
-  idsSetLed(COLOR_YELLOW);
-
-  uint16_t foundVlans[32];
-  uint8_t foundCount = 0;
-
-  uint8_t broadcast[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-
-  for (uint16_t vlan = 1; vlan <= 100; vlan++) {
-    // Build a VLAN-tagged ARP who-has for the gateway
-    uint16_t pos = buildVlanFrame(txBuf, broadcast, vlan, ETHERTYPE_ARP);
-
-    // ARP payload: who-has ourGW tell ourIP
-    pktWrite16(txBuf + pos, 0x0001);
-    pos += 2;  // HW type: Ethernet
-    pktWrite16(txBuf + pos, 0x0800);
-    pos += 2;          // Proto: IPv4
-    txBuf[pos++] = 6;  // HW addr len
-    txBuf[pos++] = 4;  // Proto addr len
-    pktWrite16(txBuf + pos, 0x0001);
-    pos += 2;  // Op: Request
-    memcpy(txBuf + pos, mac, 6);
-    pos += 6;  // Sender MAC
-    memcpy(txBuf + pos, ourIP, 4);
-    pos += 4;  // Sender IP
-    memset(txBuf + pos, 0x00, 6);
-    pos += 6;  // Target MAC (unknown)
-    memcpy(txBuf + pos, ourGW, 4);
-    pos += 4;  // Target IP
-
-    while (pos < 64)
-      txBuf[pos++] = 0;  // Pad (min frame + VLAN tag)
-
-    sendRawFrame(txBuf, pos);
-    delay(10);
-
-    // Quick check for replies
-    uint16_t rxSize = w5500.getRXReceivedSize(RAW_SOCKET);
-    while (rxSize > 0) {
-      uint16_t len = recvfrom(RAW_SOCKET, packetBuf, MAX_FRAME_SIZE, NULL, NULL);
-      if (len > 18) {  // 14 eth + 4 vlan tag minimum
-        uint16_t tpid = pktRead16(packetBuf + 12);
-        if (tpid == 0x8100) {
-          uint16_t tci = pktRead16(packetBuf + 14);
-          uint16_t respVlan = tci & 0x0FFF;
-          // Check if we already found this one
-          bool dup = false;
-          for (int i = 0; i < foundCount; i++) {
-            if (foundVlans[i] == respVlan) {
-              dup = true;
-              break;
-            }
-          }
-          if (!dup && foundCount < 32) {
-            foundVlans[foundCount++] = respVlan;
-            Serial.printf("  [VLAN] ID %u - active (tagged response received)\n", respVlan);
-          }
-        }
-      }
-      if (capturing && len > 0) {
-        writePcapPacket(packetBuf, len);
-        packetCount++;
-        uncommittedPkts++;
-      }
-      rxSize = w5500.getRXReceivedSize(RAW_SOCKET);
-    }
-  }
-
-  // Final wait for late replies
-  uint32_t waitUntil = millis() + 2000;
-  while (millis() < waitUntil) {
-    uint16_t rxSize = w5500.getRXReceivedSize(RAW_SOCKET);
-    while (rxSize > 0) {
-      uint16_t len = recvfrom(RAW_SOCKET, packetBuf, MAX_FRAME_SIZE, NULL, NULL);
-      if (len > 18) {
-        uint16_t tpid = pktRead16(packetBuf + 12);
-        if (tpid == 0x8100) {
-          uint16_t tci = pktRead16(packetBuf + 14);
-          uint16_t respVlan = tci & 0x0FFF;
-          bool dup = false;
-          for (int i = 0; i < foundCount; i++) {
-            if (foundVlans[i] == respVlan) {
-              dup = true;
-              break;
-            }
-          }
-          if (!dup && foundCount < 32) {
-            foundVlans[foundCount++] = respVlan;
-            Serial.printf("  [VLAN] ID %u - active\n", respVlan);
-          }
-        }
-      }
-      rxSize = w5500.getRXReceivedSize(RAW_SOCKET);
-    }
-    delay(10);
-  }
-
-  if (capturing && uncommittedPkts > 0)
-    commitCaptureFile();
-
-  Serial.printf("[RECON] VLAN discovery done. %u active VLANs found.\n", foundCount);
-  if (foundCount == 0) {
-    Serial.println("  (No tagged responses — port may be access mode, not trunk)");
-  }
-
-  idsSetLed(capturing ? COLOR_GREEN : COLOR_BLUE);
-}
 
 // ══════════════════════════════════════════
 //  Recon Command Parser
