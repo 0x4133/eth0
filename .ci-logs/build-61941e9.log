@@ -1,0 +1,293 @@
+/home/runner/work/eth0/eth0/eth0/attack_dhcp_starve.cpp: In function 'void dhcpStarveSendDiscover()':
+/home/runner/work/eth0/eth0/eth0/attack_dhcp_starve.cpp:48:12: warning: unused variable 'udpStart' [-Wunused-variable]
+   uint16_t udpStart = pos;
+            ^~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_dhcp_starve.cpp:59:12: warning: unused variable 'dhcpStart' [-Wunused-variable]
+   uint16_t dhcpStart = pos;
+            ^~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_dns_spoof.cpp: In function 'void dnsSpoofSendResponse(const uint8_t*, uint16_t, const uint8_t*, uint8_t, const uint8_t*)':
+/home/runner/work/eth0/eth0/eth0/attack_dns_spoof.cpp:194:12: warning: unused variable 'dnsStart' [-Wunused-variable]
+   uint16_t dnsStart = pos;
+            ^~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_tcp_rst.cpp: In function 'void parseKillCommand(const char*)':
+/home/runner/work/eth0/eth0/eth0/attack_tcp_rst.cpp:158:21: warning: format '%u' expects argument of type 'unsigned int', but argument 13 has type 'long unsigned int' [-Wformat=]
+       Serial.printf("  %u.%u.%u.%u:%u <-> %u.%u.%u.%u:%u (%us ago)\n", c.srcIP[0], c.srcIP[1],
+                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_tcp_rst.cpp:160:44:
+                     c.dstIP[3], c.dstPort, (millis() - c.lastSeen) / 1000);
+                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/attack_nbns_poison.cpp: In function 'void poisonCheckPacket(const uint8_t*, uint16_t)':
+/home/runner/work/eth0/eth0/eth0/attack_nbns_poison.cpp:81:14: warning: unused variable 'uStart' [-Wunused-variable]
+     uint16_t uStart = pos;
+              ^~~~~~
+/home/runner/work/eth0/eth0/eth0/eth0.ino: In function 'void setup()':
+/home/runner/work/eth0/eth0/eth0/eth0.ino:296:21: warning: format '%lu' expects argument of type 'long unsigned int', but argument 4 has type 'uint32_t' {aka 'unsigned int'} [-Wformat=]
+       Serial.printf("[SD] Retry %d/4 at %lu Hz...\n", attempt, speed);
+                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~           ~~~~~
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp: In function 'void pcapSerialPacket(const uint8_t*, uint16_t)':
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:89:9: warning: 'void* memcpy(void*, const void*, size_t)' forming offset [3, 4] is out of the bounds [0, 2] of object 'len' with type 'uint16_t' {aka 'short unsigned int'} [-Warray-bounds]
+   memcpy(phdr + 8, &len, 4);   // incl_len (little-endian on ESP32)
+   ~~~~~~^~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:80:52: note: 'len' declared here
+ void pcapSerialPacket(const uint8_t* pkt, uint16_t len) {
+                                           ~~~~~~~~~^~~
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:90:9: warning: 'void* memcpy(void*, const void*, size_t)' forming offset [3, 4] is out of the bounds [0, 2] of object 'len' with type 'uint16_t' {aka 'short unsigned int'} [-Warray-bounds]
+   memcpy(phdr + 12, &len, 4);  // orig_len
+   ~~~~~~^~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/hexdump.cpp:80:52: note: 'len' declared here
+ void pcapSerialPacket(const uint8_t* pkt, uint16_t len) {
+                                           ~~~~~~~~~^~~
+/home/runner/work/eth0/eth0/eth0/ids.cpp: In function 'void parseIdsCommand(const char*)':
+/home/runner/work/eth0/eth0/eth0/ids.cpp:656:21: warning: format '%u' expects argument of type 'unsigned int', but argument 13 has type 'long unsigned int' [-Wformat=]
+       Serial.printf("  %u.%u.%u.%u -> %02X:%02X:%02X:%02X:%02X:%02X (seen %us ago)\n",
+                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/ids.cpp:660:21:
+                     (millis() - arpTable[i].lastSeen) / 1000);
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/inject.cpp: In function 'void sendUDP(const uint8_t*, uint16_t, const char*, uint16_t)':
+/home/runner/work/eth0/eth0/eth0/inject.cpp:165:12: warning: unused variable 'udpStart' [-Wunused-variable]
+   uint16_t udpStart = pos;
+            ^~~~~~~~
+/home/runner/work/eth0/eth0/eth0/network_map.cpp: In function 'void printNetworkMap()':
+/home/runner/work/eth0/eth0/eth0/network_map.cpp:335:17: warning: format '%u' expects argument of type 'unsigned int', but argument 3 has type 'long unsigned int' [-Wformat=]
+   Serial.printf("    Uptime: %us  |  Free heap: %u bytes\n", millis() / 1000, ESP.getFreeHeap());
+                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/recon_lldp.cpp: In function 'void lldpPrintTable()':
+/home/runner/work/eth0/eth0/eth0/recon_lldp.cpp:154:19: warning: format '%u' expects argument of type 'unsigned int', but argument 10 has type 'long unsigned int' [-Wformat=]
+     Serial.printf("\n  [%s] %02X:%02X:%02X:%02X:%02X:%02X (seen %us ago)\n",
+                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/recon_lldp.cpp:156:45:
+                   n.srcMAC[4], n.srcMAC[5], (millis() - n.lastSeen) / 1000);
+                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/recon_mdns.cpp: In function 'void mdnsCheckPacket(const uint8_t*, uint16_t)':
+/home/runner/work/eth0/eth0/eth0/recon_mdns.cpp:108:18: warning: unused variable 'consumed' [-Wunused-variable]
+         uint16_t consumed = dnsDecodeName(dns, dnsLen, offset, aName, sizeof(aName));
+                  ^~~~~~~~
+/home/runner/work/eth0/eth0/eth0/recon_mdns.cpp: In function 'void mdnsPrintTable()':
+/home/runner/work/eth0/eth0/eth0/recon_mdns.cpp:223:19: warning: format '%u' expects argument of type 'unsigned int', but argument 6 has type 'long unsigned int' [-Wformat=]
+     Serial.printf("  %-16s %-30s %-12s %us\n",
+                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/recon_mdns.cpp:228:19:
+                   (millis() - h.lastSeen) / 1000);
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/recon_stp.cpp: In function 'void stpPrintTopology()':
+/home/runner/work/eth0/eth0/eth0/recon_stp.cpp:179:19: warning: format '%u' expects argument of type 'unsigned int', but argument 3 has type 'long unsigned int' [-Wformat=]
+     Serial.printf("    Seen:       %us ago\n", (millis() - r.lastSeen) / 1000);
+                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/recon_stp.cpp:236:19: warning: format '%u' expects argument of type 'unsigned int', but argument 14 has type 'long unsigned int' [-Wformat=]
+     Serial.printf("  %-6s %04X.%02X:%02X:%02X:%02X:%02X:%02X  %-8u 0x%04X %-6s %us%s\n", verStr,
+                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/recon_stp.cpp:239:19:
+                   (millis() - b.lastSeen) / 1000, isRoot ? " [ROOT]" : "");
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/svc_kasa.cpp: In function 'void kasaQuerySysinfo(const uint8_t*)':
+/home/runner/work/eth0/eth0/eth0/svc_kasa.cpp:354:19: warning: format '%ld' expects argument of type 'long int', but argument 3 has type 'int32_t' {aka 'int'} [-Wformat=]
+     Serial.printf("  RSSI:       %ld dBm\n", numVal);
+                   ^~~~~~~~~~~~~~~~~~~~~~~~~  ~~~~~~
+/home/runner/work/eth0/eth0/eth0/svc_kasa.cpp:372:19: warning: format '%ld' expects argument of type 'long int', but argument 3 has type 'int32_t' {aka 'int'} [-Wformat=]
+     Serial.printf("  Latitude:   %ld.%04ld\n", latWhole, latFrac);
+                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~  ~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/svc_kasa.cpp:372:19: warning: format '%ld' expects argument of type 'long int', but argument 4 has type 'int32_t' {aka 'int'} [-Wformat=]
+/home/runner/work/eth0/eth0/eth0/svc_kasa.cpp:373:19: warning: format '%ld' expects argument of type 'long int', but argument 3 has type 'int32_t' {aka 'int'} [-Wformat=]
+     Serial.printf("  Longitude:  %ld.%04ld\n", lonWhole, lonFrac);
+                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~  ~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/svc_kasa.cpp:373:19: warning: format '%ld' expects argument of type 'long int', but argument 4 has type 'int32_t' {aka 'int'} [-Wformat=]
+/home/runner/work/eth0/eth0/eth0/svc_kasa.cpp:374:19: warning: format '%ld' expects argument of type 'long int', but argument 3 has type 'int32_t' {aka 'int'} [-Wformat=]
+     Serial.printf("  Maps:       https://www.google.com/maps?q=%ld.%04ld,%ld.%04ld\n", latWhole,
+                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/svc_kasa.cpp:374:19: warning: format '%ld' expects argument of type 'long int', but argument 4 has type 'int32_t' {aka 'int'} [-Wformat=]
+/home/runner/work/eth0/eth0/eth0/svc_kasa.cpp:374:19: warning: format '%ld' expects argument of type 'long int', but argument 5 has type 'int32_t' {aka 'int'} [-Wformat=]
+/home/runner/work/eth0/eth0/eth0/svc_kasa.cpp:374:19: warning: format '%ld' expects argument of type 'long int', but argument 6 has type 'int32_t' {aka 'int'} [-Wformat=]
+/home/runner/work/eth0/eth0/eth0/svc_kasa.cpp: In function 'void kasaQueryCloud(const uint8_t*)':
+/home/runner/work/eth0/eth0/eth0/svc_kasa.cpp:482:19: warning: format '%ld' expects argument of type 'long int', but argument 3 has type 'int32_t' {aka 'int'} [-Wformat=]
+     Serial.printf("  Illegal:    %ld\n", numVal);
+                   ^~~~~~~~~~~~~~~~~~~~~  ~~~~~~
+/home/runner/work/eth0/eth0/eth0/svc_kasa.cpp:485:19: warning: format '%ld' expects argument of type 'long int', but argument 3 has type 'int32_t' {aka 'int'} [-Wformat=]
+     Serial.printf("  TCSP:       %ld\n", numVal);
+                   ^~~~~~~~~~~~~~~~~~~~~  ~~~~~~
+/home/runner/work/eth0/eth0/eth0/svc_kasa.cpp:488:19: warning: format '%ld' expects argument of type 'long int', but argument 3 has type 'int32_t' {aka 'int'} [-Wformat=]
+     Serial.printf("  FW Notify:  %ld\n", numVal);
+                   ^~~~~~~~~~~~~~~~~~~~~  ~~~~~~
+/home/runner/work/eth0/eth0/eth0/svc_kasa.cpp:491:19: warning: format '%ld' expects argument of type 'long int', but argument 3 has type 'int32_t' {aka 'int'} [-Wformat=]
+     Serial.printf("  Err Code:   %ld\n", numVal);
+                   ^~~~~~~~~~~~~~~~~~~~~  ~~~~~~
+/home/runner/work/eth0/eth0/eth0/svc_irc.cpp: In function 'void ircCheckIncomingTcp(const uint8_t*, uint16_t)':
+/home/runner/work/eth0/eth0/eth0/svc_irc.cpp:584:12: warning: unused variable 'theirAck' [-Wunused-variable]
+   uint32_t theirAck = pktRead32(tcpH + 8);
+            ^~~~~~~~
+/home/runner/work/eth0/eth0/eth0/svc_irc.cpp: In function 'void ircStatus()':
+/home/runner/work/eth0/eth0/eth0/svc_irc.cpp:841:19: warning: format '%lu' expects argument of type 'long unsigned int', but argument 11 has type 'uint32_t' {aka 'unsigned int'} [-Wformat=]
+     Serial.printf("[IRC]   [%u] %u.%u.%u.%u:%u  %s  state=%s  idle=%lus", i, c.peerIP[0],
+                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/eth0/eth0/eth0/svc_irc.cpp:843:80:
+                   c.tcpState == IRC_TCP_SYN_RCVD ? "SYN_RCVD" : "ESTABLISHED", idle);
+                                                                                ~~~~
+In file included from /home/runner/Arduino/libraries/Ethernet2/src/Dns.cpp:7:
+/home/runner/Arduino/libraries/Ethernet2/src/utility/util.h:4: warning: "htons" redefined
+ #define htons(x) ( ((x)<< 8 & 0xFF00) | \
+ 
+In file included from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/ip_addr.h:41,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter_types.h:18,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter.h:24,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_netif/include/esp_netif.h:35,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event_legacy.h:22,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event.h:28,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HWCDC.h:20,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HardwareSerial.h:54,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/Arduino.h:196,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/utility/w5500.h:18,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/Dns.cpp:5:
+/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/def.h:119: note: this is the location of the previous definition
+ #define htons(x) lwip_htons(x)
+ 
+In file included from /home/runner/Arduino/libraries/Ethernet2/src/Dns.cpp:7:
+/home/runner/Arduino/libraries/Ethernet2/src/utility/util.h:6: warning: "ntohs" redefined
+ #define ntohs(x) htons(x)
+ 
+In file included from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/ip_addr.h:41,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter_types.h:18,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter.h:24,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_netif/include/esp_netif.h:35,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event_legacy.h:22,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event.h:28,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HWCDC.h:20,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HardwareSerial.h:54,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/Arduino.h:196,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/utility/w5500.h:18,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/Dns.cpp:5:
+/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/def.h:120: note: this is the location of the previous definition
+ #define ntohs(x) lwip_ntohs(x)
+ 
+In file included from /home/runner/Arduino/libraries/Ethernet2/src/Dns.cpp:7:
+/home/runner/Arduino/libraries/Ethernet2/src/utility/util.h:8: warning: "htonl" redefined
+ #define htonl(x) ( ((x)<<24 & 0xFF000000UL) | \
+ 
+In file included from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/ip_addr.h:41,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter_types.h:18,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter.h:24,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_netif/include/esp_netif.h:35,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event_legacy.h:22,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event.h:28,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HWCDC.h:20,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HardwareSerial.h:54,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/Arduino.h:196,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/utility/w5500.h:18,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/Dns.cpp:5:
+/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/def.h:121: note: this is the location of the previous definition
+ #define htonl(x) lwip_htonl(x)
+ 
+In file included from /home/runner/Arduino/libraries/Ethernet2/src/Dns.cpp:7:
+/home/runner/Arduino/libraries/Ethernet2/src/utility/util.h:12: warning: "ntohl" redefined
+ #define ntohl(x) htonl(x)
+ 
+In file included from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/ip_addr.h:41,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter_types.h:18,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter.h:24,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_netif/include/esp_netif.h:35,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event_legacy.h:22,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event.h:28,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HWCDC.h:20,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HardwareSerial.h:54,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/Arduino.h:196,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/utility/w5500.h:18,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/Dns.cpp:5:
+/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/def.h:122: note: this is the location of the previous definition
+ #define ntohl(x) lwip_ntohl(x)
+ 
+In file included from /home/runner/Arduino/libraries/Ethernet2/src/Dhcp.cpp:10:
+/home/runner/Arduino/libraries/Ethernet2/src/utility/util.h:4: warning: "htons" redefined
+ #define htons(x) ( ((x)<< 8 & 0xFF00) | \
+ 
+In file included from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/ip_addr.h:41,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter_types.h:18,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter.h:24,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_netif/include/esp_netif.h:35,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event_legacy.h:22,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event.h:28,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HWCDC.h:20,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HardwareSerial.h:54,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/Arduino.h:196,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/utility/w5500.h:18,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/Dhcp.cpp:4:
+/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/def.h:119: note: this is the location of the previous definition
+ #define htons(x) lwip_htons(x)
+ 
+In file included from /home/runner/Arduino/libraries/Ethernet2/src/Dhcp.cpp:10:
+/home/runner/Arduino/libraries/Ethernet2/src/utility/util.h:6: warning: "ntohs" redefined
+ #define ntohs(x) htons(x)
+ 
+In file included from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/ip_addr.h:41,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter_types.h:18,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter.h:24,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_netif/include/esp_netif.h:35,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event_legacy.h:22,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event.h:28,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HWCDC.h:20,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HardwareSerial.h:54,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/Arduino.h:196,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/utility/w5500.h:18,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/Dhcp.cpp:4:
+/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/def.h:120: note: this is the location of the previous definition
+ #define ntohs(x) lwip_ntohs(x)
+ 
+In file included from /home/runner/Arduino/libraries/Ethernet2/src/Dhcp.cpp:10:
+/home/runner/Arduino/libraries/Ethernet2/src/utility/util.h:8: warning: "htonl" redefined
+ #define htonl(x) ( ((x)<<24 & 0xFF000000UL) | \
+ 
+In file included from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/ip_addr.h:41,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter_types.h:18,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter.h:24,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_netif/include/esp_netif.h:35,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event_legacy.h:22,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event.h:28,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HWCDC.h:20,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HardwareSerial.h:54,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/Arduino.h:196,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/utility/w5500.h:18,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/Dhcp.cpp:4:
+/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/def.h:121: note: this is the location of the previous definition
+ #define htonl(x) lwip_htonl(x)
+ 
+In file included from /home/runner/Arduino/libraries/Ethernet2/src/Dhcp.cpp:10:
+/home/runner/Arduino/libraries/Ethernet2/src/utility/util.h:12: warning: "ntohl" redefined
+ #define ntohl(x) htonl(x)
+ 
+In file included from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/ip_addr.h:41,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter_types.h:18,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/tcpip_adapter/include/tcpip_adapter.h:24,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_netif/include/esp_netif.h:35,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event_legacy.h:22,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/esp_event/include/esp_event.h:28,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HWCDC.h:20,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/HardwareSerial.h:54,
+                 from /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/cores/esp32/Arduino.h:196,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/utility/w5500.h:18,
+                 from /home/runner/Arduino/libraries/Ethernet2/src/Dhcp.cpp:4:
+/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/sdk/esp32s3/include/lwip/lwip/src/include/lwip/def.h:122: note: this is the location of the previous definition
+ #define ntohl(x) lwip_ntohl(x)
+ 
+/home/runner/Arduino/libraries/Ethernet2/src/Twitter.cpp: In member function 'bool Twitter::checkStatus(Print*)':
+/home/runner/Arduino/libraries/Ethernet2/src/Twitter.cpp:75:3: warning: this 'if' clause does not guard... [-Wmisleading-indentation]
+   if (c == ' ') parseStatus++; break;  // skip "HTTP/1.1 "
+   ^~
+/home/runner/Arduino/libraries/Ethernet2/src/Twitter.cpp:75:32: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the 'if'
+   if (c == ' ') parseStatus++; break;  // skip "HTTP/1.1 "
+                                ^~~~~
+/home/runner/Arduino/libraries/Ethernet2/src/utility/socket.cpp: In function 'uint16_t igmpsend(SOCKET, const uint8_t*, uint16_t)':
+/home/runner/Arduino/libraries/Ethernet2/src/utility/socket.cpp:328:11: warning: variable 'status' set but not used [-Wunused-but-set-variable]
+   uint8_t status=0;
+           ^~~~~~
+/home/runner/.arduino15/packages/esp32/tools/xtensa-esp32s3-elf-gcc/esp-2021r2-patch5-8.4.0/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld: /home/runner/.cache/arduino/sketches/141FE63903767D00A33BF05603E3F49B/sketch/svc_dns_covert.cpp.o:/home/runner/work/eth0/eth0/eth0/svc_dns_covert.cpp:21: multiple definition of `covertSentCount'; /home/runner/.cache/arduino/sketches/141FE63903767D00A33BF05603E3F49B/sketch/eth0.ino.cpp.o:/home/runner/work/eth0/eth0/eth0/eth0.ino:156: first defined here
+collect2: error: ld returned 1 exit status
+
+[92mUsed library[0m      [92mVersion[0m [90mPath[0m
+[93mAdafruit NeoPixel[0m 1.12.3  [90m/home/runner/Arduino/libraries/Adafruit_NeoPixel[0m
+[93mEthernet2[0m         1.0.4   [90m/home/runner/Arduino/libraries/Ethernet2[0m
+[93mSPI[0m               2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/SPI[0m
+[93mPreferences[0m       2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/Preferences[0m
+[93mSD[0m                2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/SD[0m
+[93mFS[0m                2.0.0   [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17/libraries/FS[0m
+
+[92mUsed platform[0m [92mVersion[0m [90mPath[0m
+[93mesp32:esp32[0m   2.0.17  [90m/home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.17[0m
+Error during build: exit status 1
