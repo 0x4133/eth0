@@ -66,11 +66,9 @@
 
 // SPI ownership and the `sdSPI` handle live in spi_bus.{h,cpp}.
 
-// Packet buffer (shared for RX and TX)
-uint8_t packetBuf[MAX_FRAME_SIZE];
-uint8_t txBuf[MAX_FRAME_SIZE];
+// packetBuf, txBuf, and capturing live in state.{h,cpp}.
 
-// Capture state
+// Capture-internal state (moves to pcap_writer.cpp in Phase 4f).
 File captureFile;
 uint32_t packetCount = 0;
 uint32_t droppedCount = 0;
@@ -78,7 +76,6 @@ uint32_t txCount = 0;
 uint32_t fileIndex = 0;
 uint32_t lastCommit = 0;
 uint32_t uncommittedPkts = 0;
-bool capturing = false;
 char currentFilename[32];  // track current filename for close/reopen
 
 // IRC server config constants live in config.h.
@@ -126,14 +123,7 @@ static IrcChannel ircChannels[IRC_MAX_CHANNELS];
 static bool ircServerActive = false;
 
 // MAC address for the W5500
-// Defined here, declared extern in state.h so other modules can read/write it.
-uint8_t mac[6] = {0x02, 0xCA, 0xFE, 0xBA, 0xBE, 0x01};
-
-// Our IP (populated by DHCP, fallback to static if DHCP fails)
-uint8_t ourIP[4] = {0, 0, 0, 0};
-uint8_t ourGW[4] = {0, 0, 0, 0};
-uint8_t ourSubnet[4] = {0, 0, 0, 0};
-uint8_t ourDNS[4] = {0, 0, 0, 0};
+// mac, ourIP, ourGW, ourSubnet, ourDNS live in state.{h,cpp}.
 
 // Static fallback (used only if DHCP fails)
 static const uint8_t fallbackIP[4] = {192, 168, 50, 200};
