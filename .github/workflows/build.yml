@@ -84,18 +84,18 @@ jobs:
           rc=${PIPESTATUS[0]}
           if [ $rc -ne 0 ]; then
             echo "── arduino-cli exited with code $rc ──"
-            # Surface every diagnostic line as a workflow annotation.
-            # arduino-cli prints GCC-style messages: file:line:col: error: ...
-            grep -E "(error|warning|fatal):" build.log | while IFS= read -r line; do
-              # Try to parse "path:line:col: kind: message"
-              if echo "$line" | grep -qE '^[^:]+:[0-9]+:[0-9]+: (error|fatal error):'; then
-                echo "::error::${line}"
-              elif echo "$line" | grep -qE '^[^:]+:[0-9]+:[0-9]+: warning:'; then
-                echo "::warning::${line}"
-              else
-                echo "::error::${line}"
-              fi
-            done
+            echo "── build.log size: $(wc -c < build.log) bytes ──"
+            # Emit every line of build.log as its own workflow
+            # annotation so the failing diagnostics survive even
+            # without artifact download access. Truncate any single
+            # line to 1000 chars (annotation hard limit).
+            line_no=0
+            while IFS= read -r line; do
+              line_no=$((line_no + 1))
+              # Strip ANSI color codes and trim to 1000 chars
+              clean=$(printf '%s' "$line" | sed 's/\x1b\[[0-9;]*m//g' | cut -c1-1000)
+              echo "::error file=build.log,line=${line_no}::${clean}"
+            done < build.log
             exit $rc
           fi
 
