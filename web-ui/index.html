@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>eth0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0a;--s1:#111;--s2:#181818;--border:#252525;--text:#c8c8c8;
+--dim:#555;--accent:#0c6;--accent2:#0af;--red:#c33;--yellow:#cc0;--orange:#e80;
+--user-bg:#0f1f0f;--ai-bg:#141414}
+body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
+font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+button{cursor:pointer;font-family:inherit}
+
+/* Header */
+header{background:var(--s1);border-bottom:1px solid var(--border);padding:6px 12px;
+display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px}
+header h1{font-size:15px;color:var(--accent);font-weight:normal;white-space:nowrap}
+header h1 .sub{color:var(--dim);font-size:11px;margin-left:6px}
+.hdr-status{display:flex;gap:10px;font-size:11px;color:var(--dim);align-items:center;flex-wrap:wrap;flex:1}
+.hdr-status .st{display:flex;align-items:center;gap:3px}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dot.on{background:var(--accent)}.dot.off{background:#333}.dot.warn{background:var(--orange)}
+.hdr-right{display:flex;gap:6px;align-items:center}
+.hdr-right select,.hdr-right button,.hdr-right input{background:var(--bg);color:var(--text);
+border:1px solid var(--border);padding:3px 6px;font-size:11px;border-radius:3px;font-family:inherit}
+.hdr-right button:hover{border-color:var(--accent);color:var(--accent)}
+#connect-btn.connected{border-color:var(--accent);color:var(--accent)}
+
+/* Tabs */
+.tabs{display:flex;background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
+.tab{padding:6px 16px;font-size:12px;color:var(--dim);cursor:pointer;border:none;
+border-bottom:2px solid transparent;background:none;white-space:nowrap}
+.tab:hover{color:var(--text)}.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-content{display:none;flex:1;overflow:hidden;flex-direction:column}
+.tab-content.active{display:flex}
+.placeholder{flex:1;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:12px;font-style:italic}
+
+/* Terminal */
+#term-output{flex:1;overflow-y:auto;padding:8px 12px;font-size:12px;white-space:pre-wrap;word-wrap:break-word;color:var(--text)}
+#term-output .term-cmd{color:var(--accent)}
+#term-output .term-sys{color:var(--dim);font-style:italic}
+#term-output .term-err{color:var(--red)}
+#term-output .term-warn{color:var(--orange)}
+#term-input-row{display:flex;gap:6px;padding:6px 12px;background:var(--s2);border-top:1px solid var(--border);flex-shrink:0;align-items:center}
+#term-prompt{color:var(--accent);font-size:12px;user-select:none}
+#term-cmd{flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border);padding:5px 8px;
+font-family:inherit;font-size:12px;border-radius:3px}
+#term-cmd:focus{border-color:var(--accent);outline:none}
+#term-clear{background:var(--bg);color:var(--dim);border:1px solid var(--border);padding:4px 10px;
+font-size:11px;border-radius:3px;font-family:inherit}
+#term-clear:hover{border-color:var(--red);color:var(--red)}
+
+/* Panels (Control / Recon / Send / Covert) */
+.panel{flex:1;overflow-y:auto;padding:10px 12px}
+.panel .intro{color:var(--dim);font-size:11px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px dashed var(--border)}
+.pnl-section{margin-bottom:14px}
+.pnl-section h3{font-size:12px;color:var(--accent);margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+.pnl-section h3 .sub{color:var(--dim);font-size:10px;text-transform:none;letter-spacing:0;margin-left:6px;font-weight:normal}
+.row{display:flex;gap:6px;align-items:center;margin-bottom:4px;flex-wrap:wrap}
+.row label{font-size:11px;color:var(--dim);min-width:90px}
+.btn{background:var(--bg);color:var(--text);border:1px solid var(--border);padding:4px 10px;
+font-size:11px;border-radius:3px;font-family:inherit;white-space:nowrap}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.danger{color:var(--red)}.btn.danger:hover{border-color:var(--red);color:var(--red)}
+.btn.warn{color:var(--orange)}.btn.warn:hover{border-color:var(--orange);color:var(--orange)}
+.btn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:bold}
+.btn.primary:hover{background:#0f8;color:var(--bg)}
+.txt{background:var(--bg);color:var(--text);border:1px solid var(--border);padding:4px 6px;
+font-size:11px;border-radius:3px;font-family:inherit;width:140px}
+.txt:focus{border-color:var(--accent);outline:none}
+.txt.wide{width:220px}.txt.narrow{width:70px}
+
+/* Settings panel (toggled from header) */
+#settings{display:none;background:var(--s1);border-bottom:1px solid var(--border);padding:10px 12px;flex-shrink:0}
+#settings.open{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#settings label{color:var(--dim);font-size:11px}
+#settings input,#settings select,#settings textarea{background:var(--bg);color:var(--text);
+border:1px solid var(--border);padding:3px 6px;font-family:inherit;font-size:11px;border-radius:3px}
+#settings input:focus,#settings select:focus,#settings textarea:focus{border-color:var(--accent);outline:none}
+#settings textarea{width:100%;height:40px;resize:vertical}
+.key-wrap{position:relative;display:inline-block}
+.key-wrap input{width:220px;padding-right:24px}
+.key-toggle{position:absolute;right:3px;top:50%;transform:translateY(-50%);background:none;
+border:none;color:var(--dim);cursor:pointer;font-size:12px}
+
+/* Chat */
+.ctx-buttons{display:flex;gap:4px;padding:5px 12px;background:var(--s2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+.ctx-btn{background:var(--bg);color:var(--dim);border:1px solid var(--border);padding:3px 8px;
+font-size:10px;border-radius:3px;font-family:inherit;cursor:pointer}
+.ctx-btn:hover{color:var(--accent);border-color:var(--accent)}
+.ctx-btn:disabled{opacity:.4;cursor:not-allowed}
+#chat-messages{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.msg{padding:8px 10px;border-radius:5px;max-width:90%;line-height:1.45;white-space:pre-wrap;word-wrap:break-word}
+.msg.user{background:var(--user-bg);border:1px solid #1a3a1a;align-self:flex-end;color:#8f8}
+.msg.assistant{background:var(--ai-bg);border:1px solid var(--border);align-self:flex-start}
+.msg.error{background:#1a0a0a;border:1px solid var(--red);color:var(--red);align-self:center;font-size:11px}
+.msg.system{color:var(--dim);align-self:center;font-size:11px;padding:4px 10px;border:1px dashed var(--border)}
+.msg .tag{font-size:10px;color:var(--dim);margin-bottom:3px}
+.msg pre{background:#050505;border:1px solid var(--border);border-radius:3px;padding:6px;margin:4px 0;overflow-x:auto;font-size:12px}
+.msg code{background:#1a1a1a;padding:1px 3px;border-radius:2px;font-size:12px}
+.msg pre code{background:none;padding:0}
+.msg h1,.msg h2,.msg h3,.msg h4{color:var(--accent);margin:8px 0 4px;font-family:inherit}
+.msg h1{font-size:16px}.msg h2{font-size:14px}.msg h3{font-size:13px}.msg h4{font-size:12px;color:var(--accent2)}
+.msg strong{color:#eee}.msg em{color:#aaa;font-style:italic}.msg del{color:var(--dim);text-decoration:line-through}
+.msg hr{border:none;border-top:1px solid var(--border);margin:8px 0}
+.msg blockquote{border-left:3px solid var(--accent);padding:2px 8px;margin:4px 0;color:var(--dim)}
+.msg ul{margin:4px 0 4px 16px;padding:0;list-style:disc}.msg li{margin:2px 0}
+.msg a{color:var(--accent2);text-decoration:underline}
+.msg p{margin:4px 0}
+.msg table{border-collapse:collapse;margin:6px 0;width:100%;font-size:12px}
+.msg th,.msg td{border:1px solid var(--border);padding:4px 8px;text-align:left}
+.msg th{background:var(--s1);color:var(--accent);font-weight:bold}
+.msg tr:nth-child(even) td{background:#0d0d0d}
+.typing::after{content:'...';animation:dots 1.5s infinite}
+@keyframes dots{0%,20%{content:'.'}40%{content:'..'}60%,100%{content:'...'}}
+#chat-input-row{background:var(--s1);border-top:1px solid var(--border);padding:8px 12px;
+display:flex;gap:6px;flex-shrink:0;align-items:flex-end}
+#user-input{flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border);
+padding:6px 10px;font-family:inherit;font-size:13px;border-radius:4px;resize:none;
+min-height:18px;max-height:120px;line-height:1.4}
+#user-input:focus{border-color:var(--accent);outline:none}
+#send-btn{background:var(--accent);color:var(--bg);border:none;padding:6px 14px;font-size:13px;
+border-radius:4px;font-weight:bold;font-family:inherit;cursor:pointer}
+#send-btn:hover{background:#0f8}
+#send-btn:disabled{background:var(--border);color:var(--dim);cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>eth0<span class="sub">web console</span></h1>
+  <div class="hdr-status">
+    <span class="st"><span class="dot off" id="d-serial"></span><span id="serial-label">Disconnected</span></span>
+  </div>
+  <div class="hdr-right">
+    <button id="connect-btn">Connect</button>
+    <select id="provider" title="AI provider">
+      <option value="anthropic">Claude</option>
+      <option value="openai">OpenAI</option>
+      <option value="gemini">Gemini</option>
+    </select>
+    <button id="settings-btn" title="Settings">cfg</button>
+  </div>
+</header>
+
+<div id="settings">
+  <label>Key</label>
+  <div class="key-wrap">
+    <input type="password" id="api-key" placeholder="API key" autocomplete="off">
+    <button class="key-toggle" id="key-toggle" type="button" title="Show/hide">*</button>
+  </div>
+  <label>Model</label><select id="model"></select>
+  <label>Tokens</label><input type="number" id="max-tokens" value="4096" min="1" max="32768" style="width:70px">
+  <label style="width:100%">System Prompt</label>
+  <textarea id="system-prompt" placeholder="Optional system prompt (defaults to a network-analyst persona)..."></textarea>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="terminal">Terminal</button>
+  <button class="tab" data-tab="control">Control</button>
+  <button class="tab" data-tab="recon">Recon</button>
+  <button class="tab" data-tab="send">Send</button>
+  <button class="tab" data-tab="covert">Covert</button>
+  <button class="tab" data-tab="chat">Chat</button>
+</div>
+
+<!-- Terminal -->
+<div class="tab-content active" id="tab-terminal">
+  <div id="term-output"></div>
+  <div id="term-input-row">
+    <span id="term-prompt">&gt;</span>
+    <input id="term-cmd" type="text" autocomplete="off" spellcheck="false" placeholder="type a command (help for menu)">
+    <button id="term-clear">clear</button>
+  </div>
+</div>
+
+<!-- Control -->
+<div class="tab-content" id="tab-control">
+  <div class="panel">
+    <div class="intro">All actions run on the connected device via serial. Output lands in the Terminal tab.</div>
+
+    <div class="pnl-section">
+      <h3>Capture & Stats</h3>
+      <div class="row">
+        <button class="btn" onclick="runCmd('s')">Toggle Capture</button>
+        <button class="btn" onclick="runCmd('stats')">Show Stats</button>
+        <button class="btn" onclick="runCmd('stats reset')">Reset Counters</button>
+        <button class="btn" onclick="runCmd('map')">Network Map</button>
+        <button class="btn" onclick="runCmd('help')">Help Menu</button>
+      </div>
+      <div class="row">
+        <label>Live stats</label>
+        <input class="txt narrow" id="stats-secs" placeholder="sec" value="5">
+        <button class="btn" onclick="runCmd('stats auto '+($('stats-secs').value.trim()||'5'))">Auto On</button>
+        <button class="btn" onclick="runCmd('stats off')">Auto Off</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>Filter <span class="sub">f [none|arp|tcp|udp|icmp] · f port &lt;N&gt; · f ip &lt;X&gt; · f mac &lt;X&gt;</span></h3>
+      <div class="row">
+        <button class="btn" onclick="runCmd('f')">Show Current</button>
+        <button class="btn" onclick="runCmd('f none')">Clear</button>
+        <button class="btn" onclick="runCmd('f arp')">ARP</button>
+        <button class="btn" onclick="runCmd('f tcp')">TCP</button>
+        <button class="btn" onclick="runCmd('f udp')">UDP</button>
+        <button class="btn" onclick="runCmd('f icmp')">ICMP</button>
+      </div>
+      <div class="row">
+        <label>Port</label>
+        <input class="txt narrow" id="f-port" placeholder="80">
+        <button class="btn" onclick="runCmd('f port '+$('f-port').value.trim())">Set</button>
+      </div>
+      <div class="row">
+        <label>IP</label>
+        <input class="txt" id="f-ip" placeholder="192.168.1.10">
+        <button class="btn" onclick="runCmd('f ip '+$('f-ip').value.trim())">Set</button>
+      </div>
+      <div class="row">
+        <label>MAC</label>
+        <input class="txt" id="f-mac" placeholder="aa:bb:cc:dd:ee:ff">
+        <button class="btn" onclick="runCmd('f mac '+$('f-mac').value.trim())">Set</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>MitM <span class="sub">ARP-poison victim ↔ gateway</span></h3>
+      <div class="row">
+        <label>Victim IP</label>
+        <input class="txt" id="mitm-ip" placeholder="192.168.1.10">
+        <button class="btn warn" onclick="runCmd('mitm start '+$('mitm-ip').value.trim())">Start</button>
+        <button class="btn danger" onclick="runCmd('mitm stop')">Stop</button>
+        <button class="btn" onclick="runCmd('mitm status')">Status</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>DNS Spoof</h3>
+      <div class="row">
+        <label>Redirect to</label>
+        <input class="txt" id="dns-ip" placeholder="10.0.0.1">
+        <button class="btn warn" onclick="runCmd('dnsspoof start '+$('dns-ip').value.trim())">Start (all domains)</button>
+        <button class="btn danger" onclick="runCmd('dnsspoof stop')">Stop</button>
+        <button class="btn" onclick="runCmd('dnsspoof list')">List Rules</button>
+      </div>
+      <div class="row">
+        <label>Domain rule</label>
+        <input class="txt" id="dns-dom" placeholder="example.com">
+        <input class="txt narrow" id="dns-tgt" placeholder="IP" style="width:110px">
+        <button class="btn" onclick="runCmd('dnsspoof add '+$('dns-dom').value.trim()+' '+$('dns-tgt').value.trim())">Add</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>IDS <span class="sub">intrusion detection (fixed detectors)</span></h3>
+      <div class="row">
+        <button class="btn" onclick="runCmd('ids')">Toggle On/Off</button>
+        <button class="btn" onclick="runCmd('ids stats')">Stats</button>
+        <button class="btn" onclick="runCmd('ids arp')">ARP Table</button>
+        <button class="btn" onclick="runCmd('ids dhcp')">DHCP Servers</button>
+        <button class="btn danger" onclick="runCmd('ids reset')">Reset Tables</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>NBNS / LLMNR Poison</h3>
+      <div class="row">
+        <button class="btn warn" onclick="runCmd('poison on')">On</button>
+        <button class="btn danger" onclick="runCmd('poison off')">Off</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>DHCP Starve</h3>
+      <div class="row">
+        <button class="btn warn" onclick="runCmd('dhcpstarve start')">Start</button>
+        <button class="btn danger" onclick="runCmd('dhcpstarve stop')">Stop</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>TCP Kill <span class="sub">RST injection</span></h3>
+      <div class="row">
+        <label>Target</label>
+        <input class="txt" id="kill-target" placeholder="1.2.3.4 or 1.2.3.4:80">
+        <button class="btn danger" onclick="runCmd('kill '+$('kill-target').value.trim())">Kill</button>
+        <button class="btn" onclick="runCmd('kill list')">List Tracked</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>MAC Identity</h3>
+      <div class="row">
+        <button class="btn" onclick="runCmd('mac')">Show</button>
+        <button class="btn" onclick="runCmd('mac random')">Random</button>
+        <button class="btn" onclick="runCmd('mac reset')">Reset Original</button>
+      </div>
+      <div class="row">
+        <label>Spoof to</label>
+        <input class="txt" id="mac-addr" placeholder="aa:bb:cc:dd:ee:ff">
+        <button class="btn" onclick="runCmd('mac set '+$('mac-addr').value.trim())">Apply</button>
+      </div>
+      <div class="row">
+        <label>Auto-rotate</label>
+        <input class="txt narrow" id="mac-auto-sec" placeholder="sec" value="30">
+        <button class="btn" onclick="runCmd('mac auto '+($('mac-auto-sec').value.trim()||'30'))">Start</button>
+        <button class="btn danger" onclick="runCmd('mac auto off')">Stop</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>Hexdump</h3>
+      <div class="row">
+        <button class="btn" onclick="runCmd('hexdump on')">Live On</button>
+        <button class="btn" onclick="runCmd('hexdump off')">Live Off</button>
+        <button class="btn" onclick="runCmd('hexdump pcap on')">PCAP Stream On</button>
+        <button class="btn" onclick="runCmd('hexdump pcap off')">PCAP Stream Off</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>Config (NVS)</h3>
+      <div class="row">
+        <button class="btn" onclick="runCmd('config save')">Save</button>
+        <button class="btn" onclick="runCmd('config load')">Load</button>
+        <button class="btn danger" onclick="runCmd('config clear')">Clear</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>Syslog Forwarder</h3>
+      <div class="row">
+        <label>Server</label>
+        <input class="txt" id="syslog-ip" placeholder="192.168.1.2">
+        <input class="txt narrow" id="syslog-port" placeholder="514" value="514">
+        <button class="btn" onclick="runCmd('syslog '+$('syslog-ip').value.trim()+' '+($('syslog-port').value.trim()||'514'))">Enable</button>
+        <button class="btn danger" onclick="runCmd('syslog off')">Disable</button>
+        <button class="btn" onclick="runCmd('syslog test')">Test</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Recon -->
+<div class="tab-content" id="tab-recon">
+  <div class="panel">
+    <div class="intro">Active and passive reconnaissance. Output streams to the Terminal tab.</div>
+
+    <div class="pnl-section">
+      <h3>ARP Sweep <span class="sub">recon sweep [IP/CIDR] &middot; default: local /24</span></h3>
+      <div class="row">
+        <label>Range</label>
+        <input class="txt wide" id="r-sweep-cidr" placeholder="192.168.1.0/24 (leave blank for local)">
+        <button class="btn" onclick="runCmd(('recon sweep '+$('r-sweep-cidr').value.trim()).trim())">Sweep</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>TCP SYN Port Probe <span class="sub">recon ports &lt;IP&gt; [p1,p2,...]</span></h3>
+      <div class="row">
+        <label>Target IP</label>
+        <input class="txt" id="r-ports-ip" placeholder="192.168.1.10">
+        <input class="txt wide" id="r-ports-list" placeholder="ports (blank = common set)">
+        <button class="btn" onclick="runCmd(('recon ports '+$('r-ports-ip').value.trim()+' '+$('r-ports-list').value.trim()).trim())">Probe</button>
+      </div>
+      <div class="row">
+        <label></label>
+        <button class="btn" onclick="$('r-ports-list').value='21,22,23,25,53,80,110,139,143,443,445,3389'">Top 12</button>
+        <button class="btn" onclick="$('r-ports-list').value='1-1024'">1-1024</button>
+        <button class="btn" onclick="$('r-ports-list').value=''">Default</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>Service Scan <span class="sub">recon scan &lt;IP&gt; [ports] &middot; probe + banner grab</span></h3>
+      <div class="row">
+        <label>Target IP</label>
+        <input class="txt" id="r-scan-ip" placeholder="192.168.1.10">
+        <input class="txt wide" id="r-scan-ports" placeholder="ports (blank = common set)">
+        <button class="btn" onclick="runCmd(('recon scan '+$('r-scan-ip').value.trim()+' '+$('r-scan-ports').value.trim()).trim())">Scan</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>VLAN Discovery <span class="sub">recon vlan &middot; passive 802.1Q tag sniff</span></h3>
+      <div class="row">
+        <button class="btn" onclick="runCmd('recon vlan')">Discover VLANs</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>STP Topology <span class="sub">recon stp [on|off|clear]</span></h3>
+      <div class="row">
+        <button class="btn" onclick="runCmd('recon stp')">Show Snapshot</button>
+        <button class="btn" onclick="runCmd('recon stp on')">Listen On</button>
+        <button class="btn danger" onclick="runCmd('recon stp off')">Listen Off</button>
+        <button class="btn" onclick="runCmd('recon stp clear')">Clear Table</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>LLDP / CDP <span class="sub">switch neighbor discovery</span></h3>
+      <div class="row">
+        <button class="btn" onclick="runCmd('recon lldp')">Listen for Neighbors</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>mDNS / NBNS Host Discovery</h3>
+      <div class="row">
+        <button class="btn" onclick="runCmd('recon mdns')">Discover Hosts</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>NetBIOS <span class="sub">recon netbios [IP|sweep|clear]</span></h3>
+      <div class="row">
+        <label>Target IP</label>
+        <input class="txt" id="r-nbt-ip" placeholder="192.168.1.10">
+        <button class="btn" onclick="runCmd('recon netbios '+$('r-nbt-ip').value.trim())">Name Table</button>
+      </div>
+      <div class="row">
+        <button class="btn" onclick="runCmd('recon netbios sweep')">Sweep Local /24</button>
+        <button class="btn" onclick="runCmd('recon netbios clear')">Clear Cache</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>Passive OS Fingerprint <span class="sub">recon fingerprint &middot; builds profile from sniffed TCP/IP</span></h3>
+      <div class="row">
+        <button class="btn" onclick="runCmd('recon fingerprint')">Show Fingerprints</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>Quick Recon Sequence</h3>
+      <div class="row">
+        <label>Target IP</label>
+        <input class="txt" id="r-quick-ip" placeholder="192.168.1.10">
+        <button class="btn primary" onclick="quickRecon()">Run</button>
+      </div>
+      <div class="row">
+        <label></label>
+        <span style="font-size:10px;color:var(--dim)">sweep &rarr; ports &rarr; scan &rarr; fingerprint (1.5s between each)</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Send (packet crafter) -->
+<div class="tab-content" id="tab-send">
+  <div class="panel">
+    <div class="intro">Craft and inject packets. Output lands in the Terminal tab.</div>
+
+    <div class="pnl-section">
+      <h3>ICMP Echo <span class="sub">send ping &lt;IP&gt;</span></h3>
+      <div class="row">
+        <label>Target IP</label>
+        <input class="txt" id="s-ping-ip" placeholder="192.168.1.10">
+        <button class="btn" onclick="runCmd('send ping '+$('s-ping-ip').value.trim())">Ping</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>ARP Who-Has <span class="sub">send arp &lt;IP&gt;</span></h3>
+      <div class="row">
+        <label>Target IP</label>
+        <input class="txt" id="s-arp-ip" placeholder="192.168.1.10">
+        <button class="btn" onclick="runCmd('send arp '+$('s-arp-ip').value.trim())">Query</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>UDP Packet <span class="sub">send udp &lt;IP&gt; &lt;PORT&gt; &lt;msg&gt;</span></h3>
+      <div class="row">
+        <label>Target</label>
+        <input class="txt" id="s-udp-ip" placeholder="IP">
+        <input class="txt narrow" id="s-udp-port" placeholder="port" value="9999">
+      </div>
+      <div class="row">
+        <label>Payload</label>
+        <input class="txt wide" id="s-udp-msg" placeholder="ASCII message">
+        <button class="btn" onclick="runCmd('send udp '+$('s-udp-ip').value.trim()+' '+$('s-udp-port').value.trim()+' '+$('s-udp-msg').value)">Send</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>Raw Ethernet Frame <span class="sub">send raw &lt;HEX&gt;</span></h3>
+      <div class="row">
+        <label>Hex bytes</label>
+        <input class="txt wide" id="s-raw-hex" placeholder="ffffffffffff0011223344550806...">
+      </div>
+      <div class="row">
+        <label></label>
+        <button class="btn" onclick="runCmd('send raw '+$('s-raw-hex').value.replace(/\s+/g,''))">Send Frame</button>
+        <span style="font-size:10px;color:var(--dim)">no spaces or 0x prefix; full Ethernet frame including DST/SRC/EtherType</span>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>PCAP Replay <span class="sub">replay &lt;file.pcap&gt; [ms]</span></h3>
+      <div class="row">
+        <label>File path</label>
+        <input class="txt wide" id="s-replay-file" placeholder="/capture.pcap">
+        <input class="txt narrow" id="s-replay-ms" placeholder="ms" value="10">
+        <button class="btn warn" onclick="runCmd('replay '+$('s-replay-file').value.trim()+' '+$('s-replay-ms').value.trim())">Replay</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Covert -->
+<div class="tab-content" id="tab-covert">
+  <div class="panel">
+    <div class="intro">Covert channels and exposed services. Output lands in the Terminal tab.</div>
+
+    <div class="pnl-section">
+      <h3>AES-128 UDP Tunnel <span class="sub">tunnel start/send/stop</span></h3>
+      <div class="row">
+        <label>Peer IP</label>
+        <input class="txt" id="t-peer-ip" placeholder="10.0.0.5">
+        <input class="txt wide" id="t-peer-key" placeholder="shared key (ASCII, padded/truncated to 16B)">
+        <button class="btn" onclick="runCmd('tunnel start '+$('t-peer-ip').value.trim()+' '+$('t-peer-key').value)">Start</button>
+        <button class="btn danger" onclick="runCmd('tunnel stop')">Stop</button>
+      </div>
+      <div class="row">
+        <label>Send message</label>
+        <input class="txt wide" id="t-msg" placeholder="message to tunnel">
+        <button class="btn" onclick="runCmd('tunnel send '+$('t-msg').value)">Send</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>DNS Covert Channel <span class="sub">covert dns server/send</span></h3>
+      <div class="row">
+        <label>Exfil server</label>
+        <input class="txt" id="c-dns-ip" placeholder="8.8.8.8">
+        <button class="btn" onclick="runCmd('covert dns server '+$('c-dns-ip').value.trim())">Set Server</button>
+      </div>
+      <div class="row">
+        <label>Data</label>
+        <input class="txt wide" id="c-dns-data" placeholder="string to exfiltrate">
+        <button class="btn warn" onclick="runCmd('covert dns send &quot;'+$('c-dns-data').value.replace(/&quot;/g,'')+'&quot;')">Exfiltrate</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>IRC Server <span class="sub">irc start/stop/status &middot; listens on :6667</span></h3>
+      <div class="row">
+        <button class="btn warn" onclick="runCmd('irc start')">Start</button>
+        <button class="btn danger" onclick="runCmd('irc stop')">Stop</button>
+        <button class="btn" onclick="runCmd('irc status')">Status</button>
+      </div>
+    </div>
+
+    <div class="pnl-section">
+      <h3>TP-Link Kasa <span class="sub">kasa &lt;IP&gt; &middot; kasa cloud &lt;IP&gt;</span></h3>
+      <div class="row">
+        <label>Device IP</label>
+        <input class="txt" id="k-ip" placeholder="192.168.1.50">
+        <button class="btn" onclick="runCmd('kasa '+$('k-ip').value.trim())">Sysinfo + GPS</button>
+        <button class="btn warn" onclick="runCmd('kasa cloud '+$('k-ip').value.trim())">Cloud Creds</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Chat -->
+<div class="tab-content" id="tab-chat">
+  <div class="ctx-buttons">
+    <button class="ctx-btn" id="ctx-stats">Analyze Stats</button>
+    <button class="ctx-btn" id="ctx-map">Network Map</button>
+    <button class="ctx-btn" id="ctx-ids">IDS Status</button>
+    <button class="ctx-btn" id="ctx-arp">ARP Table</button>
+    <button class="ctx-btn" id="ctx-dhcp">DHCP Servers</button>
+    <button class="ctx-btn" id="ctx-kill">TCP Tracked</button>
+    <button class="ctx-btn" id="ctx-help">Firmware Menu</button>
+  </div>
+  <div id="chat-messages">
+    <div class="msg system">eth0 AI console. Connect your serial port, set your API key in <b>cfg</b>, then chat or click a context button above.</div>
+  </div>
+  <div id="chat-input-row">
+    <textarea id="user-input" rows="1" placeholder="Ask about your network, an alert, or a packet..."></textarea>
+    <button id="send-btn">Send</button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+
+// ══════════════════════════════════════
+//  Tabs
+// ══════════════════════════════════════
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    $('tab-'+t.dataset.tab).classList.add('active');
+    if(t.dataset.tab==='terminal')$('term-cmd').focus();
+  });
+});
+
+// ══════════════════════════════════════
+//  Terminal buffer
+// ══════════════════════════════════════
+const TERM_MAX_LINES=800;
+// Keep a plain-text copy of the terminal for AI context grabs later.
+const termBuffer=[];
+
+function termLog(text,cls){
+  const el=$('term-output');
+  const span=document.createElement('span');
+  if(cls)span.className=cls;
+  span.textContent=text+'\n';
+  el.appendChild(span);
+  termBuffer.push(text);
+  while(el.childNodes.length>TERM_MAX_LINES)el.removeChild(el.firstChild);
+  while(termBuffer.length>TERM_MAX_LINES)termBuffer.shift();
+  el.scrollTop=el.scrollHeight;
+}
+
+function termClear(){
+  $('term-output').innerHTML='';
+  termBuffer.length=0;
+}
+
+$('term-clear').addEventListener('click',termClear);
+
+// ══════════════════════════════════════
+//  Web Serial
+// ══════════════════════════════════════
+let port=null,reader=null,writer=null;
+let serialConnected=false;
+let lineBuf='';
+
+async function serialConnect(){
+  if(serialConnected){await serialDisconnect();return;}
+  if(!('serial' in navigator)){
+    termLog('Web Serial not supported. Use Chrome/Edge on desktop.','term-err');
+    return;
+  }
+  try{
+    port=await navigator.serial.requestPort();
+    await port.open({baudRate:460800});
+    writer=port.writable.getWriter();
+    serialConnected=true;
+    $('connect-btn').textContent='Disconnect';
+    $('connect-btn').classList.add('connected');
+    $('d-serial').className='dot on';
+    $('serial-label').textContent='Connected';
+    termLog('--- Connected @ 460800 ---','term-cmd');
+    readSerialLoop();
+  }catch(e){
+    termLog('Connection failed: '+e.message,'term-err');
+  }
+}
+
+async function serialDisconnect(){
+  serialConnected=false;
+  try{if(reader){await reader.cancel();reader.releaseLock();reader=null;}}catch(e){}
+  try{if(writer){writer.releaseLock();writer=null;}}catch(e){}
+  try{if(port){await port.close();port=null;}}catch(e){}
+  $('connect-btn').textContent='Connect';
+  $('connect-btn').classList.remove('connected');
+  $('d-serial').className='dot off';
+  $('serial-label').textContent='Disconnected';
+  termLog('--- Disconnected ---','term-cmd');
+}
+
+async function readSerialLoop(){
+  const dec=new TextDecoder();
+  reader=port.readable.getReader();
+  try{
+    while(true){
+      const{value,done}=await reader.read();
+      if(done)break;
+      lineBuf+=dec.decode(value,{stream:true});
+      let lines=lineBuf.split('\n');
+      lineBuf=lines.pop(); // keep incomplete line for next read
+      for(const line of lines){
+        const trimmed=line.replace(/\r$/,'');
+        if(!trimmed)continue;
+        // Colour classification based on firmware line prefixes.
+        let cls=null;
+        if(/^\[(ERR|CRIT|ALERT)/i.test(trimmed))cls='term-err';
+        else if(/^\[(WARN|MITM|POISON|DNSSPOOF|DHCPSTARVE)/i.test(trimmed))cls='term-warn';
+        else if(/^\[(IDS|STATS|CAPTURE|CFG|MAP|KASA|IRC|RECON)/i.test(trimmed))cls='term-sys';
+        termLog(trimmed,cls);
+      }
+    }
+  }catch(e){
+    if(serialConnected)termLog('Read error: '+e.message,'term-err');
+  }finally{
+    try{if(reader)reader.releaseLock();}catch(e){}
+    reader=null;
+  }
+}
+
+async function serialSend(cmd){
+  if(!serialConnected||!writer){
+    termLog('Not connected. Click Connect first.','term-err');
+    return false;
+  }
+  try{
+    await writer.write(new TextEncoder().encode(cmd+'\n'));
+    return true;
+  }catch(e){
+    termLog('Write error: '+e.message,'term-err');
+    return false;
+  }
+}
+
+// Public helper used by every tab panel's buttons.
+async function runCmd(cmd){
+  cmd=(cmd||'').trim();
+  if(!cmd)return;
+  termLog('> '+cmd,'term-cmd');
+  await serialSend(cmd);
+}
+
+// Simple sequencer: run commands in order with a delay between them.
+async function runSequence(cmds,delayMs=1500){
+  for(const c of cmds){
+    if(!serialConnected)return;
+    await runCmd(c);
+    await new Promise(r=>setTimeout(r,delayMs));
+  }
+}
+
+// Chunk 3: "Quick Recon" button — chain the common recon primitives against one target.
+async function quickRecon(){
+  const ip=$('r-quick-ip').value.trim();
+  if(!ip){termLog('[UI] Quick Recon: target IP required','term-err');return;}
+  termLog('--- Quick Recon: '+ip+' ---','term-cmd');
+  await runSequence([
+    'recon sweep',
+    'recon ports '+ip,
+    'recon scan '+ip,
+    'recon fingerprint'
+  ],1500);
+}
+
+$('connect-btn').addEventListener('click',serialConnect);
+
+// ══════════════════════════════════════
+//  Terminal input + history
+// ══════════════════════════════════════
+const cmdHistory=[];
+let historyIdx=-1;
+
+$('term-cmd').addEventListener('keydown',async e=>{
+  const inp=$('term-cmd');
+  if(e.key==='Enter'){
+    const v=inp.value;
+    if(!v.trim())return;
+    cmdHistory.push(v);
+    if(cmdHistory.length>100)cmdHistory.shift();
+    historyIdx=cmdHistory.length;
+    inp.value='';
+    await runCmd(v);
+  }else if(e.key==='ArrowUp'){
+    e.preventDefault();
+    if(historyIdx>0){historyIdx--;inp.value=cmdHistory[historyIdx]||'';}
+  }else if(e.key==='ArrowDown'){
+    e.preventDefault();
+    if(historyIdx<cmdHistory.length-1){historyIdx++;inp.value=cmdHistory[historyIdx]||'';}
+    else{historyIdx=cmdHistory.length;inp.value='';}
+  }else if(e.key==='l'&&e.ctrlKey){
+    e.preventDefault();
+    termClear();
+  }
+});
+
+// ══════════════════════════════════════
+//  AI Chat — providers
+// ══════════════════════════════════════
+const PROVIDERS={
+  anthropic:{
+    models:[{id:'claude-sonnet-4-6',name:'Sonnet 4.6'},{id:'claude-opus-4-6',name:'Opus 4.6'},
+      {id:'claude-haiku-4-5-20251001',name:'Haiku 4.5'}],
+    endpoint:'https://api.anthropic.com/v1/messages',
+    buildReq(key,model,msgs,sys,mt){
+      const body={model,messages:msgs.map(m=>({role:m.role,content:m.content})),max_tokens:mt,stream:true};
+      if(sys)body.system=sys;
+      return{url:this.endpoint,init:{method:'POST',headers:{'Content-Type':'application/json',
+        'x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify(body)}};
+    },
+    async*parseStream(r){const rd=r.body.getReader(),d=new TextDecoder();let b='';
+      while(true){const{done,value}=await rd.read();if(done)break;b+=d.decode(value,{stream:true});
+        const ls=b.split('\n');b=ls.pop();for(const l of ls){if(!l.startsWith('data: '))continue;
+          const x=l.slice(6);if(x==='[DONE]')return;try{const j=JSON.parse(x);
+            if(j.type==='content_block_delta'&&j.delta?.text)yield j.delta.text;
+            if(j.type==='message_stop')return;}catch(e){}}}}
+  },
+  openai:{
+    models:[{id:'gpt-4o',name:'GPT-4o'},{id:'gpt-4o-mini',name:'GPT-4o Mini'},
+      {id:'o3',name:'o3'},{id:'o4-mini',name:'o4-mini'},
+      {id:'gpt-4.1',name:'GPT-4.1'},{id:'gpt-4.1-mini',name:'GPT-4.1 Mini'}],
+    endpoint:'https://api.openai.com/v1/chat/completions',
+    buildReq(key,model,msgs,sys,mt){
+      const m=[];if(sys)m.push({role:'system',content:sys});
+      m.push(...msgs.map(x=>({role:x.role,content:x.content})));
+      return{url:this.endpoint,init:{method:'POST',headers:{'Content-Type':'application/json',
+        'Authorization':'Bearer '+key},body:JSON.stringify({model,messages:m,max_tokens:mt,stream:true})}};
+    },
+    async*parseStream(r){const rd=r.body.getReader(),d=new TextDecoder();let b='';
+      while(true){const{done,value}=await rd.read();if(done)break;b+=d.decode(value,{stream:true});
+        const ls=b.split('\n');b=ls.pop();for(const l of ls){if(!l.startsWith('data: '))continue;
+          const x=l.slice(6);if(x==='[DONE]')return;try{const j=JSON.parse(x);
+            const t=j.choices?.[0]?.delta?.content;if(t)yield t;}catch(e){}}}}
+  },
+  gemini:{
+    models:[{id:'gemini-2.5-flash',name:'Gemini 2.5 Flash'},{id:'gemini-2.5-pro',name:'Gemini 2.5 Pro'},
+      {id:'gemini-2.0-flash',name:'Gemini 2.0 Flash'}],
+    endpoint:'https://generativelanguage.googleapis.com/v1beta/models/',
+    buildReq(key,model,msgs,sys,mt){
+      const contents=msgs.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
+      const body={contents,generationConfig:{maxOutputTokens:mt}};
+      if(sys)body.systemInstruction={parts:[{text:sys}]};
+      return{url:this.endpoint+model+':streamGenerateContent?alt=sse&key='+key,
+        init:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}};
+    },
+    async*parseStream(r){const rd=r.body.getReader(),d=new TextDecoder();let b='';
+      while(true){const{done,value}=await rd.read();if(done)break;b+=d.decode(value,{stream:true});
+        const ls=b.split('\n');b=ls.pop();for(const l of ls){if(!l.startsWith('data: '))continue;
+          try{const j=JSON.parse(l.slice(6));const t=j.candidates?.[0]?.content?.parts?.[0]?.text;
+            if(t)yield t;}catch(e){}}}}
+  }
+};
+
+let history=[],streaming=false,abortCtl=null;
+
+function addMsg(role,content,extra){
+  const div=document.createElement('div');div.className='msg '+role;
+  if(role==='assistant'&&extra?.model){
+    const t=document.createElement('div');t.className='tag';t.textContent=extra.model;div.appendChild(t);
+  }
+  const span=document.createElement('span');span.className='msg-text';span.textContent=content;
+  div.appendChild(span);$('chat-messages').appendChild(div);
+  $('chat-messages').scrollTop=$('chat-messages').scrollHeight;
+  return div;
+}
+
+// Minimal markdown renderer (headers, code, bold/italic, lists, tables, links).
+function renderMd(t){
+  t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  t=t.replace(/```(\w*)\n([\s\S]*?)```/g,(m,lang,code)=>'<pre><code>'+code+'</code></pre>');
+  t=t.replace(/`([^`]+)`/g,'<code>$1</code>');
+  t=t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  t=t.replace(/__(.+?)__/g,'<strong>$1</strong>');
+  t=t.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  t=t.replace(/(?<!\w)_(.+?)_(?!\w)/g,'<em>$1</em>');
+  t=t.replace(/~~(.+?)~~/g,'<del>$1</del>');
+  t=t.replace(/^#### (.+)$/gm,'<h4>$1</h4>');
+  t=t.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  t=t.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+  t=t.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+  t=t.replace(/^---+$/gm,'<hr>');
+  t=t.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
+  t=t.replace(/^[\-\*] (.+)$/gm,'<li>$1</li>');
+  t=t.replace(/^\d+\. (.+)$/gm,'<li>$1</li>');
+  t=t.replace(/((?:<li>.*<\/li>\n?)+)/g,'<ul>$1</ul>');
+  t=t.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  t=t.replace(/((?:^\|.+\|$\n?)+)/gm,function(block){
+    const rows=block.trim().split('\n').filter(r=>r.trim());
+    if(rows.length<2)return block;
+    let sepIdx=-1;
+    for(let i=0;i<rows.length;i++){if(/^\|[\s\-:|]+\|$/.test(rows[i])){sepIdx=i;break;}}
+    let html='<table>';
+    for(let i=0;i<rows.length;i++){
+      if(i===sepIdx)continue;
+      const cells=rows[i].split('|').filter((c,j,a)=>j>0&&j<a.length-1).map(c=>c.trim());
+      const tag=(sepIdx>0&&i<sepIdx)?'th':'td';
+      html+='<tr>'+cells.map(c=>'<'+tag+'>'+c+'</'+tag+'>').join('')+'</tr>';
+    }
+    return html+'</table>';
+  });
+  t=t.replace(/\n\n/g,'</p><p>');
+  return t;
+}
+
+async function sendMessage(extraContext){
+  const text=$('user-input').value.trim();
+  if((!text&&!extraContext)||streaming)return;
+  const key=$('api-key').value.trim();
+  if(!key){addMsg('error','Set API key in cfg.');$('settings').classList.add('open');return;}
+  const provider=PROVIDERS[$('provider').value],model=$('model').value;
+
+  let fullMsg='';
+  if(extraContext){
+    fullMsg='[eth0 Device Output]\n'+extraContext+'\n\n';
+    fullMsg+=text?'[User]\n'+text:'Analyze the above output. Report anomalies, security concerns, or notable patterns.';
+  }else fullMsg=text;
+
+  addMsg('user',text||'(analyze device data)');
+  history.push({role:'user',content:fullMsg});
+  $('user-input').value='';autoResize();
+
+  const aiDiv=addMsg('assistant','',{model});
+  const span=aiDiv.querySelector('.msg-text');
+  span.className='msg-text typing';span.textContent='Thinking';
+  streaming=true;$('send-btn').textContent='Stop';
+  abortCtl=new AbortController();
+
+  try{
+    const sys=$('system-prompt').value.trim()||
+      'You are eth0, an AI network security analyst embedded in an ESP32-S3 wired Ethernet tool. You analyze plain-text output from a serial console (stats, network maps, IDS tables, ARP tables, recon output). Be concise and technical.';
+    const mt=parseInt($('max-tokens').value)||4096;
+    const req=provider.buildReq(key,model,history,sys,mt);
+    req.init.signal=abortCtl.signal;
+    const response=await fetch(req.url,req.init);
+    if(!response.ok){
+      const e=await response.text();
+      let m;try{m=JSON.parse(e).error?.message||e}catch(_){m=e}
+      throw new Error(m);
+    }
+    span.className='msg-text';span.textContent='';
+    let full='';
+    for await(const chunk of provider.parseStream(response)){
+      full+=chunk;
+      span.innerHTML=renderMd(full);
+      $('chat-messages').scrollTop=$('chat-messages').scrollHeight;
+    }
+    history.push({role:'assistant',content:full});
+  }catch(e){
+    if(e.name==='AbortError'){
+      span.className='msg-text';
+      if(span.textContent&&span.textContent!=='Thinking')
+        history.push({role:'assistant',content:span.textContent});
+      else span.textContent='[stopped]';
+    }else{
+      span.className='msg-text';aiDiv.className='msg error';
+      span.textContent='Error: '+e.message;
+    }
+  }finally{streaming=false;abortCtl=null;$('send-btn').textContent='Send';}
+}
+
+function autoResize(){
+  const el=$('user-input');el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,120)+'px';
+}
+
+// ══════════════════════════════════════
+//  AI Chat — settings wiring
+// ══════════════════════════════════════
+function populateModels(){
+  const p=PROVIDERS[$('provider').value];
+  const sel=$('model');sel.innerHTML='';
+  p.models.forEach(m=>{
+    const o=document.createElement('option');o.value=m.id;o.textContent=m.name;sel.appendChild(o);
+  });
+  const saved=localStorage.getItem('eth0-model-'+$('provider').value);
+  if(saved)sel.value=saved;
+}
+
+function loadSettings(){
+  const p=localStorage.getItem('eth0-provider');if(p)$('provider').value=p;
+  populateModels();
+  const k=localStorage.getItem('eth0-key-'+$('provider').value);if(k)$('api-key').value=k;
+  const sys=localStorage.getItem('eth0-sysprompt');if(sys)$('system-prompt').value=sys;
+  const mt=localStorage.getItem('eth0-maxtokens');if(mt)$('max-tokens').value=mt;
+}
+
+function saveSettings(){
+  localStorage.setItem('eth0-provider',$('provider').value);
+  localStorage.setItem('eth0-model-'+$('provider').value,$('model').value);
+  localStorage.setItem('eth0-key-'+$('provider').value,$('api-key').value);
+  localStorage.setItem('eth0-sysprompt',$('system-prompt').value);
+  localStorage.setItem('eth0-maxtokens',$('max-tokens').value);
+}
+
+$('settings-btn').addEventListener('click',()=>$('settings').classList.toggle('open'));
+$('key-toggle').addEventListener('click',()=>{
+  const i=$('api-key');i.type=i.type==='password'?'text':'password';
+});
+$('provider').addEventListener('change',()=>{
+  populateModels();
+  const k=localStorage.getItem('eth0-key-'+$('provider').value);
+  $('api-key').value=k||'';
+  saveSettings();
+});
+['model','api-key','system-prompt','max-tokens'].forEach(id=>
+  $(id).addEventListener('change',saveSettings));
+$('api-key').addEventListener('input',saveSettings);
+$('system-prompt').addEventListener('input',saveSettings);
+
+$('user-input').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();
+    if(!streaming)sendMessage();
+  }
+});
+$('user-input').addEventListener('input',autoResize);
+$('send-btn').addEventListener('click',()=>{
+  if(streaming&&abortCtl)abortCtl.abort();
+  else sendMessage();
+});
+
+// ══════════════════════════════════════
+//  AI context buttons — run a real firmware command, grab terminal output, feed to AI
+// ══════════════════════════════════════
+async function ctxFromCmd(cmd,label,waitMs){
+  if(!serialConnected){addMsg('error','Connect to serial port first.');return;}
+  const mark=termBuffer.length;
+  termLog('--- Grabbing '+label+' ('+cmd+') ---','term-sys');
+  await runCmd(cmd);
+  await new Promise(r=>setTimeout(r,waitMs||2000));
+  const captured=termBuffer.slice(mark).filter(l=>!l.startsWith('> ')&&!l.startsWith('--- ')).join('\n');
+  if(!captured.trim()){addMsg('error','No output captured from '+cmd+'. Is the device responding?');return;}
+  // Switch to Chat tab so the user sees the AI response.
+  document.querySelector('[data-tab="chat"]').click();
+  sendMessage(label+':\n'+captured);
+}
+
+$('ctx-stats').addEventListener('click',()=>ctxFromCmd('stats','Stats',1000));
+$('ctx-map').addEventListener('click',()=>ctxFromCmd('map','Network Map',2000));
+$('ctx-ids').addEventListener('click',()=>ctxFromCmd('ids stats','IDS Status',1000));
+$('ctx-arp').addEventListener('click',()=>ctxFromCmd('ids arp','ARP Table',1500));
+$('ctx-dhcp').addEventListener('click',()=>ctxFromCmd('ids dhcp','DHCP Servers',1000));
+$('ctx-kill').addEventListener('click',()=>ctxFromCmd('kill list','TCP Tracked Connections',1000));
+$('ctx-help').addEventListener('click',()=>ctxFromCmd('help','Firmware Menu',2000));
+
+// ══════════════════════════════════════
+//  Startup
+// ══════════════════════════════════════
+loadSettings();
+termLog('eth0 web console','term-cmd');
+termLog('Click Connect, pick your USB serial port, then type a command (help for menu).','term-sys');
+if(!('serial' in navigator))termLog('Warning: this browser does not support Web Serial. Use Chrome or Edge on desktop.','term-warn');
+$('term-cmd').focus();
+</script>
+</body>
+</html>

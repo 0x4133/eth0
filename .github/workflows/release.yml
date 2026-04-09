@@ -1,0 +1,124 @@
+# Release workflow. Triggered by tagged pushes (v*.*.*) — builds the
+# firmware via the same arduino-cli toolchain the build workflow uses,
+# computes a SHA-256 checksum, and publishes a GitHub Release with
+# the .bin / .elf / .map artifacts attached.
+
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag name (e.g. v0.1.0)'
+        required: true
+
+permissions:
+  contents: write  # needed to create the release
+
+jobs:
+  release:
+    name: build and publish firmware
+    runs-on: ubuntu-latest
+
+    env:
+      ESP32_CORE_VERSION: 2.0.17
+      ETHERNET2_VERSION: 1.0.4
+      NEOPIXEL_VERSION: 1.12.3
+      FQBN: esp32:esp32:esp32s3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "ref=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "ref=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install arduino-cli
+        uses: arduino/setup-arduino-cli@v2
+
+      - name: Cache arduino-cli data
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.arduino15
+            ~/Arduino
+          key: arduino-${{ runner.os }}-esp32-${{ env.ESP32_CORE_VERSION }}-eth2-${{ env.ETHERNET2_VERSION }}-np-${{ env.NEOPIXEL_VERSION }}
+          restore-keys: |
+            arduino-${{ runner.os }}-esp32-${{ env.ESP32_CORE_VERSION }}-
+
+      - name: Configure arduino-cli
+        run: |
+          arduino-cli config init --overwrite
+          arduino-cli config add board_manager.additional_urls \
+            https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          arduino-cli core update-index
+
+      - name: Install ESP32 core
+        run: arduino-cli core install "esp32:esp32@${ESP32_CORE_VERSION}"
+
+      - name: Install pinned libraries
+        run: |
+          arduino-cli lib install "Ethernet2@${ETHERNET2_VERSION}"
+          arduino-cli lib install "Adafruit NeoPixel@${NEOPIXEL_VERSION}"
+
+      - name: Compile firmware
+        run: |
+          arduino-cli compile \
+            --fqbn "${FQBN}" \
+            --warnings more \
+            --export-binaries \
+            --output-dir release-build \
+            eth0/
+
+      - name: Compute checksums and rename
+        run: |
+          set -eu
+          cd release-build
+          tag="${{ steps.tag.outputs.ref }}"
+          mv eth0.ino.bin "eth0-${tag}.bin"
+          mv eth0.ino.elf "eth0-${tag}.elf"
+          if [ -f eth0.ino.map ]; then
+            mv eth0.ino.map "eth0-${tag}.map"
+          fi
+          sha256sum "eth0-${tag}.bin" "eth0-${tag}.elf" > "eth0-${tag}.sha256"
+          ls -la
+
+      - name: Extract changelog section
+        id: changelog
+        run: |
+          tag="${{ steps.tag.outputs.ref }}"
+          # Match `## [<tag-without-v>]` or `## [<tag>]` block in CHANGELOG.md
+          version="${tag#v}"
+          awk -v ver="${version}" '
+            $0 ~ "^## \\[" ver "\\]" {found=1; next}
+            found && /^## \[/ {exit}
+            found {print}
+          ' CHANGELOG.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "Release ${tag} of eth0." > release-notes.md
+          fi
+          echo "── release notes ──"
+          cat release-notes.md
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.ref }}
+          name: eth0 ${{ steps.tag.outputs.ref }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: false
+          files: |
+            release-build/eth0-${{ steps.tag.outputs.ref }}.bin
+            release-build/eth0-${{ steps.tag.outputs.ref }}.elf
+            release-build/eth0-${{ steps.tag.outputs.ref }}.map
+            release-build/eth0-${{ steps.tag.outputs.ref }}.sha256

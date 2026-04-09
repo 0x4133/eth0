@@ -1,0 +1,32 @@
+# Run the host-side unit tests (plain g++, no ESP32 toolchain).
+# Covers the pure helper modules: ip_util, eth_frame, dns_util,
+# and the CIDR math used by recon_arp_sweep.
+
+name: host-tests
+
+on:
+  push:
+    branches-ignore: []
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: host-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    name: g++ host unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y g++
+
+      - name: Build and run tests
+        run: tests/build.sh

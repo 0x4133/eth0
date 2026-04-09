@@ -1,0 +1,46 @@
+# ── Arduino / ESP32 build artifacts ──
+build/
+*.elf
+*.bin
+*.hex
+*.map
+*.o
+*.a
+*.d
+
+# ── Arduino IDE / arduino-cli ──
+*.ino.cpp
+*.ino.with_bootloader.*
+compile_commands.json
+
+# ── PlatformIO (future-proofing, not currently used) ──
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# ── Captured traffic / runtime artifacts ──
+*.pcap
+*.pcapng
+*.log
+
+# ── Editors & IDEs ──
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.project
+.cproject
+.settings/
+
+# ── OS junk ──
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Secrets / local config ──
+.env
+.env.local
+secrets.h
+local_config.h

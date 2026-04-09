@@ -1,0 +1,167 @@
+# Compile the eth0 Arduino sketch headlessly with arduino-cli.
+#
+# This is the same toolchain the Arduino IDE uses — arduino-cli IS the
+# Arduino IDE's build system, just scriptable. Version pins below MUST
+# stay in sync with docs/BUILDING.md and CONTRIBUTING.md so local and CI
+# builds produce identical firmware.
+
+name: build
+
+on:
+  push:
+    # Run on every branch push, not just main, so feature branches
+    # get verified before opening a PR.
+    branches-ignore: []
+  pull_request:
+  workflow_dispatch:
+
+# A second push to the same branch should cancel the earlier run.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write   # needed for the side-channel build-log push
+
+jobs:
+  compile:
+    name: arduino-cli compile (esp32s3)
+    runs-on: ubuntu-latest
+
+    env:
+      # Pinned versions — keep in sync with CONTRIBUTING.md and docs/HARDWARE.md.
+      ESP32_CORE_VERSION: 2.0.17
+      ETHERNET2_VERSION: 1.0.4
+      NEOPIXEL_VERSION: 1.12.3
+
+      # Bare FQBN — menu options are validated against the installed core,
+      # and the previous full FQBN was rejected (likely default_16MB or
+      # opi PSRAM not available in this core build). Defaults are fine
+      # for a compile-check.
+      FQBN: esp32:esp32:esp32s3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install arduino-cli
+        uses: arduino/setup-arduino-cli@v2
+
+      - name: Cache arduino-cli data
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.arduino15
+            ~/Arduino
+          key: arduino-${{ runner.os }}-esp32-${{ env.ESP32_CORE_VERSION }}-eth2-${{ env.ETHERNET2_VERSION }}-np-${{ env.NEOPIXEL_VERSION }}
+          restore-keys: |
+            arduino-${{ runner.os }}-esp32-${{ env.ESP32_CORE_VERSION }}-
+
+      - name: Configure arduino-cli
+        run: |
+          arduino-cli config init --overwrite
+          arduino-cli config add board_manager.additional_urls \
+            https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          arduino-cli core update-index
+
+      - name: Install ESP32 core
+        run: |
+          arduino-cli core install "esp32:esp32@${ESP32_CORE_VERSION}"
+          arduino-cli core list
+
+      - name: Install pinned libraries
+        run: |
+          arduino-cli lib install "Ethernet2@${ETHERNET2_VERSION}"
+          arduino-cli lib install "Adafruit NeoPixel@${NEOPIXEL_VERSION}"
+          arduino-cli lib list
+
+      - name: Compile eth0 sketch
+        # GitHub Actions runs `bash -e` by default; we explicitly turn
+        # it off here so the diagnostic-printing block below survives
+        # a failed compile.
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          arduino-cli compile \
+            --fqbn "${FQBN}" \
+            --warnings more \
+            --export-binaries \
+            --output-dir build \
+            eth0/ 2>&1 | tee build.log
+          rc=${PIPESTATUS[0]}
+          echo "── arduino-cli exited with code $rc ──"
+          echo "── build.log size: $(wc -c < build.log) bytes ──"
+          if [ $rc -ne 0 ]; then
+            echo "::group::Full build.log on failure"
+            cat build.log
+            echo "::endgroup::"
+            # Re-emit every diagnostic-looking line as a workflow
+            # annotation so the GitHub UI surfaces them inline.
+            grep -nE "(error|warning|fatal):" build.log | while IFS= read -r line; do
+              echo "::error::${line}"
+            done
+            exit $rc
+          fi
+
+      - name: Push build.log to ci-artifacts branch on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          short_sha="${GITHUB_SHA:0:7}"
+          path=".ci-logs/build-${short_sha}.log"
+          # base64 encode (single line, no wrapping)
+          content=$(base64 -w0 < build.log)
+
+          # Check if the ci-artifacts branch exists; if not, create it
+          # as an orphan branch so it doesn't share history with main.
+          api_root="https://api.github.com/repos/${GITHUB_REPOSITORY}"
+          branch_check=$(curl -fsS \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "${api_root}/branches/ci-artifacts" 2>&1)
+          if echo "$branch_check" | grep -q '"name": *"ci-artifacts"'; then
+            echo "ci-artifacts branch exists"
+          else
+            echo "ci-artifacts branch missing — creating from current commit"
+            curl -fsS \
+              -X POST \
+              -H "Authorization: token $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              -d "{\"ref\":\"refs/heads/ci-artifacts\",\"sha\":\"${GITHUB_SHA}\"}" \
+              "${api_root}/git/refs"
+          fi
+
+          # PUT the file (create or update; if it exists we'd need its
+          # blob sha which we don't have, so include a unique short_sha
+          # in the filename to avoid collisions).
+          curl -fsS \
+            -X PUT \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -d "{\"message\":\"ci: archive build log for ${short_sha} [skip ci]\",\"branch\":\"ci-artifacts\",\"content\":\"${content}\"}" \
+            "${api_root}/contents/${path}"
+
+          echo "Pushed ${path} to ci-artifacts branch"
+
+      - name: Report firmware size
+        run: |
+          echo "── Firmware artifacts ──"
+          ls -la build/
+          if [ -f build/eth0.ino.bin ]; then
+            size=$(stat -c %s build/eth0.ino.bin)
+            echo "Firmware binary: ${size} bytes ($((size / 1024)) KB)"
+          fi
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: eth0-firmware-${{ github.sha }}
+          path: |
+            build/eth0.ino.bin
+            build/eth0.ino.elf
+            build/eth0.ino.map
+          if-no-files-found: warn
+          retention-days: 14

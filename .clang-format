@@ -1,0 +1,83 @@
+# eth0 firmware formatting rules.
+# Base: Google C++ Style, with embedded-firmware deltas documented in
+# docs/STYLE.md. Apply with `clang-format -i eth0/**/*.{h,cpp,ino}`.
+
+Language: Cpp
+BasedOnStyle: Google
+
+# ── Width ──
+# Google default is 80; packet-builder code is denser and reads better at 100.
+ColumnLimit: 100
+
+# ── Indentation ──
+IndentWidth: 2
+ContinuationIndentWidth: 4
+TabWidth: 2
+UseTab: Never
+AccessModifierOffset: -1
+NamespaceIndentation: None
+
+# ── Pointers & references ──
+# Google derives this from the file; we standardize on left alignment.
+DerivePointerAlignment: false
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# ── Braces & newlines ──
+BreakBeforeBraces: Attach
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+KeepEmptyLinesAtTheStartOfBlocks: false
+
+# ── Includes ──
+# Regroup into: (1) matching header, (2) C system, (3) C++ system,
+# (4) Arduino core/libs, (5) project headers.
+SortIncludes: CaseInsensitive
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex:           '^<(Arduino|SPI|SD|Wire|Ethernet[0-9]*|EthernetUdp|utility/[A-Za-z0-9_]+|Adafruit_NeoPixel|Preferences|mbedtls/[A-Za-z0-9_]+)\.h>'
+    Priority:        4
+  - Regex:           '^<[A-Za-z0-9_]+\.h>'
+    Priority:        2          # C system headers
+  - Regex:           '^<[A-Za-z0-9_/]+>'
+    Priority:        3          # C++ std headers
+  - Regex:           '^".*"'
+    Priority:        5          # project headers
+  - Regex:           '.*'
+    Priority:        6
+
+# ── Whitespace ──
+SpacesBeforeTrailingComments: 2
+SpaceAfterCStyleCast: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+
+# ── Long statements ──
+BinPackArguments: true
+BinPackParameters: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignEscapedNewlines: Left
+AlignOperands: true
+AlignTrailingComments: true
+
+# ── Penalties (tuned so long printf format strings don't get line-broken) ──
+PenaltyBreakAssignment: 100
+PenaltyBreakBeforeFirstCallParameter: 200
+PenaltyBreakComment: 300
+PenaltyBreakString: 1000
+PenaltyBreakTemplateDeclaration: 10
+PenaltyExcessCharacter: 1000000
+PenaltyReturnTypeOnItsOwnLine: 200
+
+# ── Misc ──
+Cpp11BracedListStyle: true
+FixNamespaceComments: true
+ReflowComments: false
+Standard: c++17
