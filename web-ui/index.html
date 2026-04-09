@@ -250,6 +250,7 @@ border-radius:4px;font-weight:bold;font-family:inherit;cursor:pointer}
         <input class="txt" id="dns-dom" placeholder="example.com">
         <input class="txt narrow" id="dns-tgt" placeholder="IP" style="width:110px">
         <button class="btn" onclick="runCmd('dnsspoof add '+$('dns-dom').value.trim()+' '+$('dns-tgt').value.trim())">Add</button>
+        <button class="btn danger" onclick="runCmd('dnsspoof remove '+$('dns-dom').value.trim())">Remove</button>
       </div>
     </div>
 
